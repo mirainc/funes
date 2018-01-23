@@ -5,7 +5,7 @@ services:
       context: ./
       dockerfile: Dockerfile
     ports:
-    - "8888:8888"
+    - "80:8888"
     volumes:
     - ./:/usr/src/app/:rw
     command: bash -c "sh ./start.sh"
