@@ -1,0 +1,13 @@
+version: '2'
+services:
+  nginx:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+    - "8888:8888"
+    volumes:
+    - ./:/usr/src/app/:rw
+    command: bash -c "sh ./start.sh"
+    environment:
+    - HELLO=WORLD
