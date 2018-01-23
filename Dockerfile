@@ -2,7 +2,7 @@ FROM ubuntu:16.04
 
 # Install Nginx + Nchan
 RUN apt-get update
-RUN apt-get -y install nginx
+RUN apt-get -y install nginx nginx-extras
 
 EXPOSE 80 443
 
