@@ -1,4 +1,4 @@
-dev:
+start:
 	sh scripts/dev.sh
 
 validate:

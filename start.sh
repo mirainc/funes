@@ -1,7 +1,14 @@
-cp ./nginx.conf /etc/nginx/nginx.conf
-cp ./default.conf /etc/nginx/conf.d
+set -e
 
-nginx -g 'daemon off;'
+# sleep infinity
 
-sleep 2
-tail -f /var/log/nginx/*.log
+cp ./nginx.conf /usr/local/nginx/conf/nginx.conf
+cp ./default.conf /usr/local/nginx/conf/nginx.conf.default
+
+cp ./certs/nginx.crt /usr/local/nginx/nginx.crt
+cp ./certs/nginx.key /usr/local/nginx/nginx.key
+
+# start local dns server
+dnsmasq --port 53 --no-hosts --no-resolv -C "/usr/src/app/dnsmasq.conf"
+
+/usr/local/nginx/sbin/nginx -g 'daemon off;'
