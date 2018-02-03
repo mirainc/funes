@@ -1483,7 +1483,7 @@ ngx_http_proxy_connect_address(ngx_conf_t *cf, ngx_command_t *cmd,
     ngx_int_t                           rc;
     ngx_str_t                          *value;
     ngx_http_complex_value_t            cv;
-    ngx_http_proxy_connect_address_t         **paddress, *address;
+    ngx_http_proxy_connect_address_t  **paddress, *address;
     ngx_http_compile_complex_value_t    ccv;
 
     paddress = (ngx_http_proxy_connect_address_t **) (p + cmd->offset);
@@ -1712,10 +1712,14 @@ ngx_http_proxy_connect_set_address(ngx_http_request_t *r,
     }
 
     if (address->value == NULL) {
-        u->peer.sockaddr = address->addr->sockaddr;
-        u->peer.socklen = address->addr->socklen;
-        u->peer.name = &address->addr->name;
+
         u->resolved->naddrs = 1;
+        u->resolved->addrs = NULL;
+        u->resolved->sockaddr = address->addr->sockaddr;
+        u->resolved->socklen = address->addr->socklen;
+        u->resolved->name = address->addr->name;
+        u->resolved->host = address->addr->name;
+
         return NGX_OK;
     }
 

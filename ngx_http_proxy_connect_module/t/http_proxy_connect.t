@@ -21,7 +21,7 @@ use Test::Nginx;
 select STDERR; $| = 1;
 select STDOUT; $| = 1;
 
-my $t = Test::Nginx->new()->has(qw/http proxy/)->plan(9);
+my $t = Test::Nginx->new()->has(qw/http proxy/)->plan(10);
 
 $t->write_file_expand('nginx.conf', <<'EOF');
 
@@ -119,6 +119,65 @@ like($log, qr/CONNECT www\.taobao111114\.com:80.*var:www\.taobao111114\.com-80--
 $t->stop();
 
 ###############################################################################
+
+$t->write_file_expand('nginx.conf', <<'EOF');
+
+%%TEST_GLOBALS%%
+
+daemon         off;
+
+events {
+}
+
+http {
+    %%TEST_GLOBALS_HTTP%%
+
+    log_format connect '$remote_addr - $remote_user [$time_local] "$request" '
+                       '$status $body_bytes_sent var:$connect_host-$connect_port-$connect_addr';
+
+    access_log %%TESTDIR%%/connect.log connect;
+
+    server {
+        listen  8081;
+        listen  8082;
+        access_log off;
+        location / {
+            return 200 "hello $remote_addr $server_port\n";
+        }
+    }
+
+    server {
+        listen       127.0.0.1:8080;
+        server_name  localhost;
+
+        # forward proxy for CONNECT method
+
+        proxy_connect;
+        proxy_connect_allow all;
+
+        proxy_connect_connect_timeout 10s;
+        proxy_connect_read_timeout 10s;
+        proxy_connect_send_timeout 10s;
+        proxy_connect_send_lowat 0;
+
+        proxy_connect_address 127.0.0.1:8082;
+#        proxy_connect_bind 127.0.0.3;
+
+        location / {
+            proxy_pass http://127.0.0.1:8081;
+        }
+    }
+}
+
+EOF
+
+
+$t->run();
+like(http_connect_request('address.com', '8081', '/'), qr/hello 127.0.0.1 8082/, 'set remote address without nginx variable');
+$t->stop();
+
+###############################################################################
+
 
 sub http_connect_request {
     my ($host, $port, $url) = @_;

@@ -57,38 +57,67 @@ A simple test with command `curl` is as following:
 
 ```
 $ curl https://github.com/ -v -x 127.0.0.1:3128
-*   Trying 127.0.0.1...
-* Connected to 127.0.0.1 (127.0.0.1) port 3128 (#0)
-* Establish HTTP proxy tunnel to github.com:443
-> CONNECT github.com:443 HTTP/1.1
-> Host: github.com:443
-> User-Agent: curl/7.43.0
-> Proxy-Connection: Keep-Alive
+*   Trying 127.0.0.1...                                           -.
+* Connected to 127.0.0.1 (127.0.0.1) port 3128 (#0)                | curl creates TCP connection with nginx (with proxy_connect module).
+* Establish HTTP proxy tunnel to github.com:443                   -'
+> CONNECT github.com:443 HTTP/1.1                                 -.
+> Host: github.com:443                                         (1) | curl sends CONNECT request to create tunnel.
+> User-Agent: curl/7.43.0                                          |
+> Proxy-Connection: Keep-Alive                                    -'
 >
-< HTTP/1.0 200 Connection Established
-< Proxy-agent: nginx
-<
+< HTTP/1.0 200 Connection Established                             .- nginx replies 200 that tunnel is established.
+< Proxy-agent: nginx                                           (2)|  (The client is now being proxied to the remote host. Any data sent
+<                                                                 '-  to nginx is now forwarded, unmodified, to the remote host)
+
 * Proxy replied OK to CONNECT request
-* TLS 1.2 connection using TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
-* Server certificate: github.com
-* Server certificate: DigiCert SHA2 Extended Validation Server CA
-* Server certificate: DigiCert High Assurance EV Root CA
-> GET / HTTP/1.1
-> Host: github.com
-> User-Agent: curl/7.43.0
-> Accept: */*
+* TLS 1.2 connection using TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256  -.
+* Server certificate: github.com                                   |
+* Server certificate: DigiCert SHA2 Extended Validation Server CA  | curl sends "https://github.com" request via tunnel,
+* Server certificate: DigiCert High Assurance EV Root CA           | proxy_connect module will proxy data to remote host (github.com).
+> GET / HTTP/1.1                                                   |
+> Host: github.com                                             (3) |
+> User-Agent: curl/7.43.0                                          |
+> Accept: */*                                                     -'
 >
-< HTTP/1.1 200 OK
-< Date: Fri, 11 Aug 2017 04:13:57 GMT
-< Content-Type: text/html; charset=utf-8
-< Transfer-Encoding: chunked
-< Server: GitHub.com
-< Status: 200 OK
-< Cache-Control: no-cache
-< Vary: X-PJAX
-...
-... <other response headers & response body> ...
-...
+< HTTP/1.1 200 OK                                                 .-
+< Date: Fri, 11 Aug 2017 04:13:57 GMT                             |
+< Content-Type: text/html; charset=utf-8                          |  Any data received from remote host will be sent to client
+< Transfer-Encoding: chunked                                      |  by proxy_connect module.
+< Server: GitHub.com                                           (4)|
+< Status: 200 OK                                                  |
+< Cache-Control: no-cache                                         |
+< Vary: X-PJAX                                                    |
+...                                                               |
+... <other response headers & response body> ...                  |
+...                                                               '-
+```
+
+The sequence diagram of above example is as following:
+
+```
+  curl                     nginx (proxy_connect)            github.com
+    |                             |                          |
+(1) |-- CONNECT github.com:443 -->|                          |
+    |                             |                          |
+(2) |<- HTTP/1.1 200           ---|                          |
+    |   Connection Established    |                          |
+    |                             |                          |
+    ~~  CONNECT tunnel has       ~~                          |
+    ~~  been establesied.        ~~                          |
+    |                             |                          |
+    |                             |                          |
+    |   [ SSL stream       ]      |                          |
+(3) |---[ GET / HTTP/1.1   ]----->|   [ SSL stream       ]   |
+    |   [ Host: github.com ]      |---[ GET / HTTP/1.1   ]-->.
+    |                             |   [ Host: github.com ]   |
+    |                             |                          |
+    |                             |                          |
+    |                             |                          |
+    |                             |   [ SSL stream       ]   |
+    |   [ SSL stream       ]      |<--[ HTTP/1.1 200 OK  ]---'
+(4) |<--[ HTTP/1.1 200 OK  ]------|   [ < html page >    ]   |
+    |   [ < html page >    ]      |                          |
+    |                             |                          |
 ```
 
 Also you can configure your browser to use this nginx as PROXY server (e.g. Google Chrome HTTP PROXY SETTING).
