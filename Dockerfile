@@ -21,7 +21,7 @@ WORKDIR /usr/tmp/nginx-1.12.1
 # RUN patch -p1 < /usr/tmp/ngx_http_proxy_connect_module/proxy_connect.patch
 RUN patch -p1 < /usr/tmp/ngx_http_proxy_connect_module/proxy_connect_rewrite.patch
 
-RUN ./configure --add-module=/usr/tmp/ngx_http_proxy_connect_module --with-http_ssl_module
+RUN ./configure --add-module=/usr/tmp/ngx_http_proxy_connect_module --with-http_ssl_module --with-http_slice_module
 RUN make && make install
 
 # Install dnsmasq. Only required if not using proxy_connect_rewrite
