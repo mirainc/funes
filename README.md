@@ -65,6 +65,9 @@ The main proxy server uses Nginx, and the [Nginx Proxy Connect](https://github.c
 
 To redirect all HTTPS requests received by the tunnel back to Nginx, a local `dnsmasq` instance is started that responds to all DNS requests with `127.0.0.1`. This local `dnsmasq` is configured as the DNS resolver for the proxy.
 
+- Basic proxy setup taken from: https://stackoverflow.com/questions/46060028/how-to-use-nginx-as-forward-proxy-for-any-requested-location
+- Cache config for proxy_cache: https://www.nginx.com/blog/nginx-caching-guide/
+
 ## Todo
 - [ ] Implement base case cache strategy
 - [ ] Allow specifying other cache cases

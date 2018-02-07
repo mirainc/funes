@@ -28,7 +28,7 @@ RUN make && make install
 # RUN apt-get -y install dnsmasq
 
 # Install debugging tools
-# RUN apt-get -y install dnsutils curl vim
+# RUN apt-get -y install dnsutils curl vim tcptrack
 
 RUN mkdir -p /usr/local/nginx/logs/
 
