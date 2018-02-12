@@ -1,5 +1,5 @@
 ## Cache configuration
-proxy_cache_path /tmp/fwd_proxy_cache levels=1:2 keys_zone=fwd_proxy_cache:10m max_size=10g inactive=365d use_temp_path=off;
+proxy_cache_path /data/fwd_proxy_cache levels=1:2 keys_zone=fwd_proxy_cache:10m max_size=10g inactive=365d use_temp_path=off;
 proxy_cache_convert_head off;
 proxy_cache_methods GET HEAD;
 proxy_cache_background_update on;

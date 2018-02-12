@@ -1,12 +1,13 @@
 set -e
 
+mkdir -p /data
 mkdir -p ./build/certs
 
-cp ./conf/nginx.conf ./build/conf/nginx.conf
-cp ./conf/nginx.conf.default ./build/conf/nginx.conf.default
+cp ./conf/nginx.conf ./build/conf
+cp ./conf/nginx.conf.server ./build/conf
 
-cp ./certs/nginx.crt ./build/conf/nginx.crt
-cp ./certs/nginx.key ./build/conf/nginx.key
-cp ./certs/cacert.pem ./build/conf/cacert.pem
+cp ./certs/nginx.crt ./build/conf
+cp ./certs/nginx.key ./build/conf
+cp ./certs/cacert.pem ./build/conf
 
-cp ./scripts/run.sh ./build/run.sh
+cp ./scripts/run.sh ./build
