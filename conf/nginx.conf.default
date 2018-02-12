@@ -70,8 +70,8 @@ server {
     listen 3128;
     listen 443 ssl;
 
-    ssl_certificate     /usr/local/nginx/nginx.crt;
-    ssl_certificate_key /usr/local/nginx/nginx.key;
+    ssl_certificate     ./nginx.crt;
+    ssl_certificate_key ./nginx.key;
 
     add_header Proxied-By $proxied_by_value;
 
@@ -98,7 +98,7 @@ server {
         proxy_cache fwd_proxy_cache;
         proxy_cache_key $scheme$request_method$host$uri$is_args$args$slice_range;
 
-        access_log /usr/local/nginx/logs/cache.log nginx_cache;
+        access_log ./logs/cache.log nginx_cache;
     }
 }
 
@@ -142,7 +142,7 @@ server {
 
         proxy_ssl_verify on;
         proxy_ssl_verify_depth 2;
-        proxy_ssl_trusted_certificate /usr/local/nginx/cacert.pem;
+        proxy_ssl_trusted_certificate ./cacert.pem;
         proxy_ssl_server_name on;
     }
 }
