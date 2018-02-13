@@ -6,11 +6,33 @@ A forward proxy with caching.
 
 ## Start
 
+funes listens on ports 80, 443, and 3128. By default it will cache all GET requests for 1 minute, with certain content types having longer expirations (see `conf/nginx.conf.server`). It will serve stale responses indefinitely if there is no network connection.
+
+### Build for your local architecture
+
+```
+make
+```
+
+This will compile Nginx and place all required files in the `build` directory.
+
+Inside the `build` directory, `sh run.sh` to start the application.
+
+`make package` can be run to zip the `build` directory to `package/funes.zip`. The zip can be extracted and run elsewhere.
+
+## Development
+
 This assumes you are using `docker-machine` on a Mac.
 
 ```
-make start
+make dev
 ```
+
+will start a local development instance in Docker.
+
+### Customizing expiration rules
+
+In `conf/nginx.conf.server`, expiration rules can be set for URI (`$uri_expiry`), host (`$host_expiry`), and content type (`$content_type_expiry`). By default there are only content type expiry rules defined. Refer to the examples in this file for usage patterns.
 
 ## Configuring browser proxy
 
@@ -63,12 +85,7 @@ Details about other cache cases:
 
 The main proxy server uses Nginx, and the [Nginx Proxy Connect](https://github.com/chobits/ngx_http_proxy_connect_module) module to implement HTTP `CONNECT` method handling (since Nginx does not natively support the `CONNECT` method).
 
-To redirect all HTTPS requests received by the tunnel back to Nginx, a local `dnsmasq` instance is started that responds to all DNS requests with `127.0.0.1`. This local `dnsmasq` is configured as the DNS resolver for the proxy.
+~~To redirect all HTTPS requests received by the tunnel back to Nginx, a local `dnsmasq` instance is started that responds to all DNS requests with `127.0.0.1`. This local `dnsmasq` is configured as the DNS resolver for the proxy.~~ Although dnsmasq works well for this purpose, we now use the `proxy_connect_address` directive provided by the Nginx Proxy Connect module, which redirects all proxied traffic to the specified address.
 
 - Basic proxy setup taken from: https://stackoverflow.com/questions/46060028/how-to-use-nginx-as-forward-proxy-for-any-requested-location
 - Cache config for proxy_cache: https://www.nginx.com/blog/nginx-caching-guide/
-
-## Todo
-- [ ] Implement base case cache strategy
-- [ ] Allow specifying other cache cases
-- [ ] Static fallback content?

@@ -1,10 +1,14 @@
-default: run
+default: install
 
 dev:
 	sh dev.sh
 
 run: install
 	cd build && sh run.sh
+
+package: install clear-logs
+	mkdir -p package
+	zip -r package/funes.zip build
 
 install: build configure
 
@@ -25,7 +29,7 @@ download:
 	mkdir -p download
 	wget -P download http://nginx.org/download/nginx-1.12.1.tar.gz
 
-clean: clean-build clean-download clean-extract
+clean: clean-build clean-download clean-extract clean-package
 
 clean-build:
 	rm -rf build
@@ -37,11 +41,17 @@ clean-extract:
 clean-download:
 	rm -rf download
 
+clean-package:
+	rm -rf package
+
 sniff:
 	tcptrack -i eth0 -r 2
 
-rmcache:
-	rm -rf /data/fwd_proxy_cache
+clear-cache:
+	rm -rf /data/funes_rmb_cache
+
+make clear-logs:
+	rm -f build/logs/*.log
 
 tail-cache:
 	tail -f build/logs/cache.log
