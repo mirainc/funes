@@ -111,34 +111,29 @@ server {
 ## HTTP and HTTPS forward proxies. These proxy requests to external upstreams
 ## and set custom expiration headers to allow granular expiration rules.
 ##
-## The config for both proxies should be kept in sync.
-##
 
-server {
-    listen 4480;
+map $server_port $forward_proxied_by_value {
+    4480 "funes-forward";
+    4443 "funes-ssl-forward";
+}
 
-    add_header Proxied-By "funes-secondary";
-
-    expires $uri_expiry;
-
-    location / {
-        resolver 8.8.8.8;
-
-        proxy_pass http://$host$uri$is_args$args;
-    }
+map $server_port $forward_proxy_scheme {
+    4480 http;
+    4443 https;
 }
 
 server {
+    listen 4480;
     listen 4443;
 
-    add_header Proxied-By "funes-ssl-secondary";
+    add_header Proxied-By $forward_proxied_by_value;
 
     expires $uri_expiry;
 
     location / {
         resolver 8.8.8.8;
 
-        proxy_pass https://$host$uri$is_args$args;
+        proxy_pass $forward_proxy_scheme://$host$uri$is_args$args;
 
         proxy_ssl_verify on;
         proxy_ssl_verify_depth 2;
