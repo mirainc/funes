@@ -20,6 +20,13 @@ Inside the `build` directory, `sh run.sh` to start the application.
 
 `make package` can be run to zip the `build` directory to `package/funes.zip`. The zip can be extracted and run elsewhere.
 
+### Build for Docker
+
+```
+docker build -f Dockerfile.build .
+docker run -d -p 3128:3128 <created_image_id>
+```
+
 ## Development
 
 This assumes you are using `docker-machine` on a Mac.

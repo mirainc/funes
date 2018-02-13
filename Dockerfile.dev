@@ -1,0 +1,21 @@
+FROM ubuntu:16.04
+
+RUN mkdir -p /usr/src/app
+
+# Install build tools
+RUN apt-get update
+RUN apt-get -y install wget patch build-essential libpcre3 libpcre3-dev
+RUN apt-get -y install zlib1g-dev
+RUN apt-get -y install libssl-dev
+
+# Install dnsmasq. Only required if not using proxy_connect_rewrite
+# RUN apt-get -y install dnsmasq
+
+# Install debugging tools
+# RUN apt-get -y install dnsutils curl vim tcptrack
+
+EXPOSE 80 443 3128
+
+WORKDIR /usr/src/app
+
+CMD ["make run"]
