@@ -1,0 +1,28 @@
+FROM ubuntu:16.04
+
+RUN mkdir -p /usr/src/tmp
+
+# Install build tools
+RUN apt-get update
+RUN apt-get -y install wget patch build-essential libpcre3 libpcre3-dev
+RUN apt-get -y install zlib1g-dev
+RUN apt-get -y install libssl-dev
+
+WORKDIR /usr/src/tmp
+COPY ./certs /usr/src/tmp/certs
+COPY ./conf /usr/src/tmp/conf
+COPY ./ngx_http_proxy_connect_module /usr/src/tmp/ngx_http_proxy_connect_module
+COPY ./scripts /usr/src/tmp/scripts
+COPY ./Makefile /usr/src/tmp/
+COPY ./*.sh /usr/src/tmp/
+RUN make install
+RUN mv /usr/src/tmp/build /usr/src/app
+
+# Install debugging tools
+# RUN apt-get -y install dnsutils curl vim tcptrack
+
+EXPOSE 80 443 3128
+
+WORKDIR /usr/src/app
+
+CMD ["sh", "run.sh"]

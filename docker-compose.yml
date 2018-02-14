@@ -3,14 +3,14 @@ services:
   nginx:
     build:
       context: ./
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
     - "80:80"
     - "443:443"
     - "3128:3128"
     volumes:
     - ./:/usr/src/app/:rw
-    # command: bash -c "sh ./start.sh"
-    command: bash -c "sh ./sleep.sh"
+    command: bash -c "make run"
+    # command: bash -c "sleep infinity"
     environment:
     - HELLO=WORLD
