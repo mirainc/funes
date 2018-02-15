@@ -1,17 +1,12 @@
 ## Cache configuration
 proxy_cache_path /data/funes_rmb_cache levels=1:2 keys_zone=fwd_proxy_cache:10m max_size=10g inactive=365d use_temp_path=off;
-proxy_cache_convert_head off;
-proxy_cache_methods GET HEAD;
-proxy_cache_background_update on;
-proxy_cache_use_stale error timeout;
-proxy_cache_lock on;
 
 ## Set valid cached response types.
 ## The time here is overridden by our injected `expires $uri_expiry` header.
 proxy_cache_valid 200 206 301 302 1s;
 
 ## Ignore headers that make requests uncacheable
-proxy_ignore_headers Set-Cookie Vary;
+proxy_ignore_headers Set-Cookie Vary X-Accel-Expires Expires Cache-Control;
 
 ## Settings for handling range requests
 slice 1m;
@@ -90,9 +85,9 @@ server {
     # that is causing issues with the cache - it takes a long time to respond
     # to stale requests, maybe because it's trying to use an open channel.
     # Keeping these timeouts low seems to alleviate that problem.
-    proxy_connect_connect_timeout       2s;
-    proxy_connect_read_timeout          2s;
-    proxy_connect_send_timeout          2s;
+    proxy_connect_connect_timeout       10s;
+    proxy_connect_read_timeout          10s;
+    proxy_connect_send_timeout          10s;
     proxy_connect_address               127.0.0.1:443;
 
     location / {
@@ -104,6 +99,13 @@ server {
         proxy_pass $proxy_destination;
         proxy_cache fwd_proxy_cache;
         proxy_cache_key $scheme$request_method$host$uri$is_args$args$slice_range;
+        proxy_cache_convert_head off;
+        proxy_cache_methods GET HEAD;
+        proxy_cache_use_stale error timeout updating http_500 http_502 http_503 http_504;
+        proxy_cache_background_update off;
+        proxy_cache_lock on;
+
+        add_header X-Funes-Cache-Status $upstream_cache_status;
 
         access_log ./logs/cache.log nginx_cache;
     }
