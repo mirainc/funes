@@ -22,28 +22,31 @@ proxy_set_header  Range $slice_range;
 
 ## Configures expiration for upstream content based on content type.
 map $upstream_http_content_type $content_type_expiry {
-    default                     1m;
-    'application/json'          1m;
-    'application/pdf'           max;                        # max means 10 years to nginx
-    'application/octet-stream'  max;
-    'image/jpeg'                max;
-    'image/gif'                 max;
-    'image/png'                 max;
-    'image/bmp'                 max;
-    'image/webp'                max;
-    'video/webm'                max;
-    'video/ogg'                 max;
-    'video/mp4'                 max;
+    default                                 1m;
+    'application/json'                      1m;
+    'application/pdf'                       max;            # max means 10 years to nginx
+    'application/octet-stream'              max;
+    'image/jpeg'                            max;
+    'image/gif'                             max;
+    'image/png'                             max;
+    'image/bmp'                             max;
+    'image/webp'                            max;
+    'video/webm'                            max;
+    'video/ogg'                             max;
+    'video/mp4'                             max;
+    'application/binary'                    -1s;            # used by HLS streams
+    'application/vnd.apple.mpegurl'         -1s;
 }
 
 map $host $host_expiry {
     default                     $content_type_expiry;
-    # foo.com                     30d;                      # example of expiry by host
+    # foo.com                   30d;                        # example of expiry by host
+    "~*uplynk.com"              -1s;                        # known HLS stream provider
 }
 
 map $uri $uri_expiry {
     default                     $host_expiry;
-    # "~*.gifv"                   30d;                      # example of expiry by uri/file extension
+    # "~*.gifv"                 30d;                        # example of expiry by uri/file extension
 }
 
 # ====================== End Expiration Rules ====================== #
