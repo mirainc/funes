@@ -2,28 +2,20 @@
 proxy_cache_path /data/funes_rmb_cache levels=1:2 keys_zone=fwd_proxy_cache:10m max_size=10g inactive=365d use_temp_path=off;
 proxy_cache_convert_head off;
 proxy_cache_methods GET HEAD;
-proxy_cache_background_update on;
-proxy_cache_use_stale error timeout updating;
 proxy_cache_lock on;
 
-## Set valid cached response types.
-## The time here is overridden by our injected `expires $uri_expiry` header.
-proxy_cache_valid 200 206 301 302 1s;
-
 ## Ignore headers that make requests uncacheable
-proxy_ignore_headers Set-Cookie Vary;
-
-## Settings for handling range requests
-slice 1m;
-proxy_set_header  Range $slice_range;
+# proxy_ignore_headers X-Accel-Expires Expires Cache-Control Set-Cookie Vary;
+proxy_ignore_headers Set-Cookie Vary X-Accel-Buffering;
+proxy_buffering on;
 
 
 # ====================== Expiration Rules ====================== #
 
 ## Configures expiration for upstream content based on content type.
 map $upstream_http_content_type $content_type_expiry {
-    default                                 1m;
-    'application/json'                      1m;
+    default                                 10s;
+    'application/json'                      10s;
     'application/pdf'                       max;            # max means 10 years to nginx
     'application/octet-stream'              max;
     'image/jpeg'                            max;
@@ -67,9 +59,19 @@ map $scheme $proxied_by_value {
 }
 
 ## Proxy destination based on scheme
-map $scheme $proxy_destination {
-    "http"      http://127.0.0.1:4480;
-    "https"     http://127.0.0.1:4443;
+map $scheme $normal_proxy_cache_backend {
+    "http"      http://127.0.0.1:3129;
+    "https"     http://127.0.0.1:3130;
+}
+
+map $scheme $range_proxy_cache_backend {
+    "http"      http://127.0.0.1:4481;
+    "https"     http://127.0.0.1:4444;
+}
+
+map $http_range $proxy_cache_backend {
+    default     $normal_proxy_cache_backend;
+    "bytes=~*"  $range_proxy_cache_backend;
 }
 
 server {
@@ -81,6 +83,7 @@ server {
     ssl_certificate_key ./nginx.key;
 
     add_header Proxied-By $proxied_by_value;
+    add_header X-Funes-Cache-Status $upstream_cache_status;
 
     proxy_connect;
     proxy_connect_allow                 443 563;
@@ -90,9 +93,9 @@ server {
     # that is causing issues with the cache - it takes a long time to respond
     # to stale requests, maybe because it's trying to use an open channel.
     # Keeping these timeouts low seems to alleviate that problem.
-    proxy_connect_connect_timeout       2s;
-    proxy_connect_read_timeout          2s;
-    proxy_connect_send_timeout          2s;
+    proxy_connect_connect_timeout       10s;
+    proxy_connect_read_timeout          10s;
+    proxy_connect_send_timeout          10s;
     proxy_connect_address               127.0.0.1:443;
 
     location / {
@@ -101,15 +104,52 @@ server {
         proxy_set_header Host            $host;
         proxy_set_header X-Forwarded-For $remote_addr;
 
-        proxy_pass $proxy_destination;
+        proxy_pass $proxy_cache_backend;
+
+        access_log ./logs/proxy.log nginx_cache;
+    }
+}
+
+# ====================== End Client Proxy ====================== #
+
+
+# ====================== General Cache Proxy ====================== #
+
+map $server_port $proxy_rewrite_backend {
+    3129    http://127.0.0.1:4480;
+    3130    http://127.0.0.1:4443;
+}
+
+map $server_port $proxy_method {
+    3129    "http";
+    3130    "https";
+}
+
+server {
+    listen 3129;
+    listen 3130;
+
+    add_header X-Cache-Status $upstream_cache_status;
+
+    location / {
+        proxy_set_header Host            $host;
+        proxy_set_header X-Forwarded-For $remote_addr;
+
+        proxy_pass $proxy_rewrite_backend;
         proxy_cache fwd_proxy_cache;
-        proxy_cache_key $scheme$request_method$host$uri$is_args$args$slice_range;
+        proxy_cache_key $proxy_method$request_method$host$uri$is_args$args;
+        proxy_cache_use_stale error timeout updating;
+        proxy_cache_background_update on;
+
+        ## Set valid cached response types.
+        ## The time here is overridden by our injected `expires $uri_expiry` header.
+        proxy_cache_valid 200 206 1s;
 
         access_log ./logs/cache.log nginx_cache;
     }
 }
 
-# ====================== End Client Proxy ====================== #
+# ====================== End General Cache Proxy ====================== #
 
 
 # ====================== Forward Proxies ====================== #
@@ -146,7 +186,60 @@ server {
         proxy_ssl_verify_depth 2;
         proxy_ssl_trusted_certificate ./cacert.pem;
         proxy_ssl_server_name on;
+
+
+        access_log ./logs/forward_proxy.log nginx_cache;
     }
 }
 
+
 # ====================== End Forward Proxies ====================== #
+
+
+# ====================== Range Request Cache Proxy ====================== #
+
+map $server_port $forward_range_proxied_by_value {
+    4481 "funes-range-forward";
+    4444 "funes-ssl-range-forward";
+}
+
+map $server_port $forward_range_proxy_scheme {
+    4481 http;
+    4444 https;
+}
+
+server {
+    listen 4481;
+    listen 4444;
+
+    add_header Proxied-By $forward_range_proxied_by_value;
+
+    ## Settings for handling range requests
+    slice 1m;
+    proxy_set_header  Range $slice_range;
+
+    proxy_ignore_headers X-Accel-Expires Expires Cache-Control Set-Cookie Vary;
+
+    location / {
+        resolver 8.8.8.8;
+
+        add_header X-Cache-Status $upstream_cache_status;
+
+        proxy_pass $forward_range_proxy_scheme://$host$uri$is_args$args;
+        proxy_cache fwd_proxy_cache;
+        proxy_cache_valid 200 206 100;
+        proxy_cache_key $forward_range_proxy_scheme$request_method$host$uri$is_args$args$slice_range;
+        proxy_cache_use_stale error timeout;
+        proxy_cache_background_update off;
+        proxy_cache_valid 200 206 3650d;
+
+        proxy_ssl_verify on;
+        proxy_ssl_verify_depth 2;
+        proxy_ssl_trusted_certificate ./cacert.pem;
+        proxy_ssl_server_name on;
+
+        access_log ./logs/range_cache.log nginx_cache;
+    }
+}
+
+# ====================== End Range Request Proxy/Cache ====================== #
