@@ -5,7 +5,6 @@ proxy_cache_methods GET HEAD;
 proxy_cache_lock on;
 
 ## Ignore headers that make requests uncacheable
-# proxy_ignore_headers X-Accel-Expires Expires Cache-Control Set-Cookie Vary;
 proxy_ignore_headers Set-Cookie Vary X-Accel-Buffering;
 proxy_buffering on;
 
