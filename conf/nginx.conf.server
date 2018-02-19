@@ -138,6 +138,12 @@ server {
         proxy_cache_use_stale error timeout updating;
         proxy_cache_background_update on;
 
+        # These timeouts ensure that the stale cache is used quickly if network
+        # goes down. The timeouts are for time to first byte, not entire request duration.
+        proxy_connect_timeout 1s;
+        proxy_read_timeout 2s;
+        proxy_send_timeout 2s;
+
         ## Set valid cached response types.
         ## The time here is overridden by our injected `expires $uri_expiry` header.
         proxy_cache_valid 200 206 1s;
@@ -222,7 +228,6 @@ server {
         proxy_pass $forward_range_proxy_scheme://$host$uri$is_args$args;
         proxy_ignore_headers X-Accel-Expires Expires Cache-Control Set-Cookie Vary;
         proxy_cache fwd_proxy_cache;
-        proxy_cache_valid 200 206 100;
         proxy_cache_key $forward_range_proxy_scheme$request_method$host$uri$is_args$args$slice_range;
         proxy_cache_use_stale error timeout;
         proxy_cache_background_update off;
