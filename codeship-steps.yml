@@ -3,4 +3,7 @@
   - type: serial
     service: funes
     steps:
+      # - command: bash -c "make run & pip install -r test/requirements.txt && python -m unittest discover test"
+      - command: make install
+      - command: bash -c "mkdir -p /data/funes_rmb_cache && build/sbin/nginx -t -c ./conf/nginx.conf"
       - command: bash -c "make run & pip install -r test/requirements.txt && python -m unittest discover test"

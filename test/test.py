@@ -8,6 +8,7 @@ from sultan.api import Sultan
 s = Sultan()
 
 PROXY_PATH = os.environ.get('PROXY_PATH', '127.0.0.1:3128')
+RUN_CONTEXT = os.environ.get('RUN_CONTEXT', 'local')
 
 if not PROXY_PATH:
     raise Exception('Expected PROXY_PATH environment variable to be set.')
@@ -38,8 +39,12 @@ def clear_cache():
         raise Exception('Failed to clear cache: %s' % result.stderr)
 
 
+def can_disable_network():
+    return RUN_CONTEXT == 'local'
+
+
 def disable_network():
-    if is_online():
+    if can_disable_network() and is_online():
         result = s.ifconfig('eth0 down').run()
         if result.rc != 0:
             raise Exception('Failed to disable network: %s' % result.stderr)
@@ -66,6 +71,8 @@ def is_online():
 
 
 time.sleep(3)  # wait for nginx to start
+print "Running in context: %s" % RUN_CONTEXT
+print "Can disable network: %s" % can_disable_network()
 
 
 class CacheTests(unittest.TestCase):
@@ -100,26 +107,30 @@ class CacheTests(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.headers['Funes-Cache-Status'], 'HIT')
 
-        disable_network()
+        cached_time = r.headers['Date']
 
-        r = fetch(url, headers)
-        self.assertEqual(r.status_code, 200)
-        self.assertEqual(r.headers['Funes-Cache-Status'], 'HIT')
+        if can_disable_network():
+            disable_network()
+
+            r = fetch(url, headers)
+            self.assertEqual(r.status_code, 200)
+            self.assertEqual(r.headers['Funes-Cache-Status'], 'HIT')
 
         if eta is not None:
             time.sleep(eta + 1)  # add 1s buffer
 
+            if can_disable_network():
+                r = fetch(url, headers)
+                self.assertEqual(r.status_code, 200)
+                self.assertEqual(r.headers['Funes-Cache-Status'], 'STALE')
+
+                cached_time = r.headers['Date']
+
+                enable_network()
+
             r = fetch(url, headers)
             self.assertEqual(r.status_code, 200)
-            self.assertEqual(r.headers['Funes-Cache-Status'], 'STALE')
-
-            stale_time = r.headers['Date']
-
-            enable_network()
-
-            r = fetch(url, headers)
-            self.assertEqual(r.status_code, 200)
-            self.assertNotEqual(stale_time, r.headers['Date'])
+            self.assertNotEqual(cached_time, r.headers['Date'])
             self.assertEqual(r.headers['Funes-Cache-Status'], 'EXPIRED')
 
     def test_get_http_image(self):

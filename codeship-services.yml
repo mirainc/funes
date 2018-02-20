@@ -3,4 +3,7 @@ funes:
     image: funes
     path: .
     dockerfile_path: Dockerfile.test
-  privileged: true
+  environment:
+    - RUN_CONTEXT=codeship
+  volumes:
+    - ./:/usr/src/app/

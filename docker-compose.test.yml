@@ -10,6 +10,9 @@ services:
     - "3128:3128"
     volumes:
     - ./:/usr/src/app/:rw
+    environment:
+    - RUN_CONTEXT=local
+    # - RUN_CONTEXT=codeship
     privileged: true
     # command: bash -c "sleep infinity"
     command: bash -c "make run & pip install -r test/requirements.txt && python -m unittest discover test"
