@@ -29,7 +29,7 @@ EXPIRED_SSL_URL = 'https://expired.badssl.com'
 def fetch(url, headers=None):
     if headers is None:
         headers = {}
-    return requests.get(url, proxies=proxies, headers={}, verify=False)
+    return requests.get(url, proxies=proxies, headers=headers, verify=False)
 
 
 def clear_cache():
