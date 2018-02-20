@@ -1,0 +1,6 @@
+- type: parallel
+  steps:
+  - type: serial
+    service: funes
+    steps:
+      - command: bash -c "make run & pip install -r test/requirements.txt && python -m unittest discover test"

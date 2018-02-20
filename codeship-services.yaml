@@ -1,0 +1,6 @@
+funes:
+  build:
+    image: funes
+    path: .
+    dockerfile_path: Dockerfile.test
+  privileged: true
