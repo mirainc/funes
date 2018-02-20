@@ -20,7 +20,6 @@ proxies = {
 HTTP_IMAGE_URL = 'http://www.titaniumteddybear.net/wp-content/uploads/2011/04/wow-its-fucking-nothing.jpg'
 HTTPS_IMAGE_URL = 'https://i.imgur.com/3YBkyf6.jpg'
 
-
 def fetch(url):
     return requests.get(url, proxies=proxies, verify=False)
 
@@ -32,26 +31,45 @@ def clear_cache():
 
 
 def disable_network():
-    result = s.ifconfig('eth0 down').run()
-    if result.rc != 0:
-        raise Exception('Failed to disable network: %s' % result.stderr)
+    if is_online():
+        result = s.ifconfig('eth0 down').run()
+        if result.rc != 0:
+            raise Exception('Failed to disable network: %s' % result.stderr)
 
 
 def enable_network():
-    result = s.ifconfig('eth0 up').run()
+    if not is_online():
+        result = s.ifconfig('eth0 up').run()
+        if result.rc != 0:
+            raise Exception('Failed to enable network: %s' % result.stderr)
+
+        result = s.route('add default gw 172.20.0.1 eth0').run()
+        if result.rc != 0:
+            raise Exception('Failed to set default gateway: %d' % result.rc)
+
+
+def is_online():
+    result = s.cat('/sys/class/net/eth0/operstate').run()
     if result.rc != 0:
-        raise Exception('Failed to enable network: %s' % result.stderr)
-
-    result = s.route('add default gw 172.20.0.1 eth0').run()
-    if result.rc != 0:
-        raise Exception('Failed to set default gateway: %d' % result.rc)
+        raise Exception('Failed to get network status: %s' % result.stderr)
+    return result.stdout[0] == 'up'
 
 
-clear_cache()
 time.sleep(3)  # wait for nginx to start
 
 
 class CacheTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        enable_network()
+        clear_cache()
+
+    @classmethod
+    def tearDownClass(self):
+        clear_cache()
+
+    def tearDown(self):
+        enable_network()
 
     def test_get_http_image(self):
         r = fetch(HTTP_IMAGE_URL)
@@ -68,8 +86,6 @@ class CacheTests(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.headers['Funes-Cache-Status'], 'HIT')
 
-        enable_network()
-
     def test_get_https_image(self):
         r = fetch(HTTPS_IMAGE_URL)
         self.assertEqual(r.status_code, 200)
@@ -84,5 +100,3 @@ class CacheTests(unittest.TestCase):
         r = fetch(HTTPS_IMAGE_URL)
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.headers['Funes-Cache-Status'], 'HIT')
-
-        enable_network()
