@@ -13,8 +13,8 @@ proxy_buffering on;
 
 ## Configures expiration for upstream content based on content type.
 map $upstream_http_content_type $content_type_expiry {
-    default                                 10s;
-    'application/json'                      10s;
+    default                                 5s;
+    'application/json'                      5s;
     'application/pdf'                       max;            # max means 10 years to nginx
     'application/octet-stream'              max;
     'image/jpeg'                            max;
@@ -149,8 +149,8 @@ server {
         # These timeouts ensure that the stale cache is used quickly if network
         # goes down. The timeouts are for time to first byte, not entire request duration.
         proxy_connect_timeout 1s;
-        proxy_read_timeout 2s;
-        proxy_send_timeout 2s;
+        proxy_read_timeout 4s;
+        proxy_send_timeout 4s;
 
         ## Set valid cached response types.
         ## The time here is overridden by our injected `expires $uri_expiry` header.

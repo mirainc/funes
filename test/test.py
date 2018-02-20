@@ -18,10 +18,16 @@ proxies = {
 }
 
 HTTP_IMAGE_URL = 'http://www.titaniumteddybear.net/wp-content/uploads/2011/04/wow-its-fucking-nothing.jpg'
-HTTPS_IMAGE_URL = 'https://i.imgur.com/3YBkyf6.jpg'
+# HTTP_IMAGE_URL = 'http://www.webmfiles.org/wp-content/uploads/2010/05/webm-files.jpg'
 
-def fetch(url):
-    return requests.get(url, proxies=proxies, verify=False)
+HTTPS_IMAGE_URL = 'https://i.imgur.com/3YBkyf6.jpg'
+HTTPS_VIDEO_URL = 'https://prefetch-video-sample.storage.googleapis.com/gbike.webm'
+RSS_URL = 'http://www.avclub.com/rss'
+
+def fetch(url, headers=None):
+    if headers is None:
+        headers = {}
+    return requests.get(url, proxies=proxies, headers={}, verify=False)
 
 
 def clear_cache():
@@ -47,6 +53,8 @@ def enable_network():
         if result.rc != 0:
             raise Exception('Failed to set default gateway: %d' % result.rc)
 
+        time.sleep(2)  # wait for network to come back online
+
 
 def is_online():
     result = s.cat('/sys/class/net/eth0/operstate').run()
@@ -61,6 +69,7 @@ time.sleep(3)  # wait for nginx to start
 class CacheTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        disable_network()
         enable_network()
         clear_cache()
 
@@ -71,32 +80,45 @@ class CacheTests(unittest.TestCase):
     def tearDown(self):
         enable_network()
 
-    def test_get_http_image(self):
-        r = fetch(HTTP_IMAGE_URL)
+    def case_fetch_resource(self, url, headers=None, eta=None):
+        r = fetch(url, headers)
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.headers['Funes-Cache-Status'], 'MISS')
 
-        r = fetch(HTTP_IMAGE_URL)
+        r = fetch(url, headers)
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.headers['Funes-Cache-Status'], 'HIT')
 
         disable_network()
 
-        r = fetch(HTTP_IMAGE_URL)
+        r = fetch(url, headers)
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.headers['Funes-Cache-Status'], 'HIT')
+
+        if eta is not None:
+            time.sleep(eta + 1)  # add 1s buffer
+
+            r = fetch(url, headers)
+            self.assertEqual(r.status_code, 200)
+            self.assertEqual(r.headers['Funes-Cache-Status'], 'STALE')
+
+            stale_time = r.headers['Date']
+
+            enable_network()
+
+            r = fetch(url, headers)
+            self.assertEqual(r.status_code, 200)
+            self.assertNotEqual(stale_time, r.headers['Date'])
+            self.assertEqual(r.headers['Funes-Cache-Status'], 'EXPIRED')
+
+    def test_get_http_image(self):
+        self.case_fetch_resource(HTTP_IMAGE_URL)
 
     def test_get_https_image(self):
-        r = fetch(HTTPS_IMAGE_URL)
-        self.assertEqual(r.status_code, 200)
-        self.assertEqual(r.headers['Funes-Cache-Status'], 'MISS')
+        self.case_fetch_resource(HTTPS_IMAGE_URL)
 
-        r = fetch(HTTPS_IMAGE_URL)
-        self.assertEqual(r.status_code, 200)
-        self.assertEqual(r.headers['Funes-Cache-Status'], 'HIT')
+    def test_get_video(self):
+        self.case_fetch_resource(HTTPS_VIDEO_URL, headers={'bytes': '0-65535'})
 
-        disable_network()
-
-        r = fetch(HTTPS_IMAGE_URL)
-        self.assertEqual(r.status_code, 200)
-        self.assertEqual(r.headers['Funes-Cache-Status'], 'HIT')
+    def test_get_rss(self):
+        self.case_fetch_resource(RSS_URL, eta=5)
