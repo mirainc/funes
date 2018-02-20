@@ -3,6 +3,10 @@ default: install
 dev:
 	sh dev.sh
 
+.PHONY: test
+test:
+	sh test.sh
+
 run: install
 	cd build && sh run.sh
 
@@ -48,13 +52,16 @@ sniff:
 	tcptrack -i eth0 -r 2
 
 clear-cache:
-	rm -rf /data/funes_rmb_cache
+	rm -rf /data/funes_rmb_cache/*
 
 make clear-logs:
 	rm -f build/logs/*.log
 
 tail-cache:
 	tail -f build/logs/cache.log
+
+tail-rangecache:
+	tail -f build/logs/range_cache.log
 
 tail-error:
 	tail -f build/logs/error.log
