@@ -23,6 +23,7 @@ HTTPS_IMAGE_URL = 'https://i.imgur.com/3YBkyf6.jpg'
 HTTPS_VIDEO_URL = 'https://prefetch-video-sample.storage.googleapis.com/gbike.webm'
 RSS_URL = 'http://www.avclub.com/rss'
 HLS_STREAM_URL = 'http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8'
+EXPIRED_SSL_URL = 'https://expired.badssl.com'
 
 
 def fetch(url, headers=None):
@@ -135,3 +136,7 @@ class CacheTests(unittest.TestCase):
 
     def test_get_hls(self):
         self.case_fetch_uncached_resource(HLS_STREAM_URL)
+
+    def test_get_expired_ssl(self):
+        r = fetch(EXPIRED_SSL_URL)
+        self.assertEqual(r.status_code, 502)
