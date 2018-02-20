@@ -26,7 +26,7 @@ map $upstream_http_content_type $content_type_expiry {
     'video/ogg'                             max;
     'video/mp4'                             max;
     'application/binary'                    -1s;            # used by HLS streams
-    'application/vnd.apple.mpegurl'         -1s;
+    '~*mpegurl'                             -1s;
 }
 
 map $host $host_expiry {

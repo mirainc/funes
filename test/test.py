@@ -17,12 +17,13 @@ proxies = {
     'https': 'https://' + PROXY_PATH,
 }
 
-HTTP_IMAGE_URL = 'http://www.titaniumteddybear.net/wp-content/uploads/2011/04/wow-its-fucking-nothing.jpg'
-# HTTP_IMAGE_URL = 'http://www.webmfiles.org/wp-content/uploads/2010/05/webm-files.jpg'
 
+HTTP_IMAGE_URL = 'http://www.webmfiles.org/wp-content/uploads/2010/05/webm-files.jpg'
 HTTPS_IMAGE_URL = 'https://i.imgur.com/3YBkyf6.jpg'
 HTTPS_VIDEO_URL = 'https://prefetch-video-sample.storage.googleapis.com/gbike.webm'
 RSS_URL = 'http://www.avclub.com/rss'
+HLS_STREAM_URL = 'http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8'
+
 
 def fetch(url, headers=None):
     if headers is None:
@@ -80,6 +81,15 @@ class CacheTests(unittest.TestCase):
     def tearDown(self):
         enable_network()
 
+    def case_fetch_uncached_resource(self, url, headers=None):
+        r = fetch(url, headers)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.headers['Funes-Cache-Status'], 'MISS')
+
+        r = fetch(url, headers)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.headers['Funes-Cache-Status'], 'MISS')
+
     def case_fetch_resource(self, url, headers=None, eta=None):
         r = fetch(url, headers)
         self.assertEqual(r.status_code, 200)
@@ -122,3 +132,6 @@ class CacheTests(unittest.TestCase):
 
     def test_get_rss(self):
         self.case_fetch_resource(RSS_URL, eta=5)
+
+    def test_get_hls(self):
+        self.case_fetch_uncached_resource(HLS_STREAM_URL)
