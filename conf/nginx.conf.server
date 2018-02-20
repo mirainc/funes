@@ -144,7 +144,7 @@ server {
         ## This config attempts to serve updated responses immediately,
         ## serving a stale response if there is an error/timeout.
         ## Use when immediate updates are preferred.
-        proxy_cache_use_stale error timeout;
+        proxy_cache_use_stale error timeout http_500 http_502 http_503 http_504;
         proxy_cache_background_update off;
 
         # These timeouts ensure that the stale cache is used quickly if network
