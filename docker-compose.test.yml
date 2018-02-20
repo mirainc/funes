@@ -11,5 +11,5 @@ services:
     volumes:
     - ./:/usr/src/app/:rw
     privileged: true
-    command: bash -c "sleep infinity"
-    # command: bash -c "make run & pip install -r test/requirements.txt && python -m unittest discover test"
+    # command: bash -c "sleep infinity"
+    command: bash -c "make run & pip install -r test/requirements.txt && python -m unittest discover test"
