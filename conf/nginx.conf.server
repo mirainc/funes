@@ -81,8 +81,7 @@ server {
     ssl_certificate     ./nginx.crt;
     ssl_certificate_key ./nginx.key;
 
-    add_header Proxied-By $proxied_by_value;
-    add_header X-Funes-Cache-Status $upstream_cache_status;
+    add_header Funes-Proxied-By $proxied_by_value;
 
     proxy_connect;
     proxy_connect_allow                 443 563;
@@ -126,7 +125,7 @@ server {
     listen 3129;
     listen 3130;
 
-    add_header X-Cache-Status $upstream_cache_status;
+    add_header Funes-Cache-Status $upstream_cache_status;
 
     location / {
         proxy_set_header Host            $host;
@@ -185,7 +184,7 @@ server {
     listen 4480;
     listen 4443;
 
-    add_header Proxied-By $forward_proxied_by_value;
+    add_header Funes-Proxied-By $forward_proxied_by_value;
 
     expires $uri_expiry;
 
@@ -221,7 +220,7 @@ server {
     listen 4481;
     listen 4444;
 
-    add_header Proxied-By $forward_range_proxied_by_value;
+    add_header Funes-Proxied-By $forward_range_proxied_by_value;
 
     ## Settings for handling range requests
     slice 1m;
@@ -232,7 +231,7 @@ server {
     location / {
         resolver 8.8.8.8;
 
-        add_header X-Cache-Status $upstream_cache_status;
+        add_header Funes-Cache-Status $upstream_cache_status;
 
         proxy_pass $forward_range_proxy_scheme://$host$uri$is_args$args;
         proxy_ignore_headers X-Accel-Expires Expires Cache-Control Set-Cookie Vary;
