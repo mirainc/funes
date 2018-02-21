@@ -55,7 +55,7 @@ clear-cache:
 	rm -rf /data/funes_rmb_cache/*
 
 make clear-logs:
-	rm -f build/logs/*.log
+	cd build && sh logtruncate.sh
 
 tail-cache:
 	tail -f build/logs/cache.log
