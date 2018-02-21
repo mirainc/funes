@@ -37,6 +37,18 @@ make dev
 
 will start a local development instance in Docker.
 
+### Testing Changes
+
+Run the full test suite:
+
+```
+make test
+```
+
+Due to Codeship limitations, it's not possible to run the full test suite in Codeship because you cannot disable the network adapter.
+
+Full test suite should be run with `RUN_CONTEXT=local` after changes to test offline functionality.
+
 ### Customizing expiration rules
 
 In `conf/nginx.conf.server`, expiration rules can be set for URI (`$uri_expiry`), host (`$host_expiry`), and content type (`$content_type_expiry`). By default there are only content type expiry rules defined. Refer to the examples in this file for usage patterns.

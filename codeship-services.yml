@@ -1,0 +1,9 @@
+funes:
+  build:
+    image: funes
+    path: .
+    dockerfile_path: Dockerfile.test
+  environment:
+    - RUN_CONTEXT=codeship
+  volumes:
+    - ./:/usr/src/app/

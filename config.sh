@@ -10,4 +10,4 @@ cp ./certs/nginx.crt ./build/conf
 cp ./certs/nginx.key ./build/conf
 cp ./certs/cacert.pem ./build/conf
 
-cp ./scripts/run.sh ./build
+cp ./scripts/*.sh ./build
