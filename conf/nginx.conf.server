@@ -74,9 +74,8 @@ map $http_range $proxy_cache_backend {
 }
 
 server {
-    listen 80;
+    include ./transparent_proxy/*.conf;
     listen 3128;
-    listen 443 ssl;
 
     ssl_certificate     ./nginx.crt;
     ssl_certificate_key ./nginx.key;
