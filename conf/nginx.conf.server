@@ -74,9 +74,9 @@ map $http_range $proxy_cache_backend {
 }
 
 server {
-    listen 80;
+    include ./transparent_proxy/*.conf;
+    listen 444 ssl;
     listen 3128;
-    listen 443 ssl;
 
     ssl_certificate     ./nginx.crt;
     ssl_certificate_key ./nginx.key;
@@ -94,7 +94,7 @@ server {
     proxy_connect_connect_timeout       10s;
     proxy_connect_read_timeout          10s;
     proxy_connect_send_timeout          10s;
-    proxy_connect_address               127.0.0.1:443;
+    proxy_connect_address               127.0.0.1:444;
 
     location / {
         resolver 8.8.8.8;
