@@ -17,6 +17,7 @@ map $upstream_http_content_type $content_type_expiry {
     'application/json'                      5s;
     'application/pdf'                       max;            # max means 10 years to nginx
     'application/octet-stream'              max;
+    'binary/octet-stream'                   max;
     'image/jpeg'                            max;
     'image/gif'                             max;
     'image/png'                             max;
