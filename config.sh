@@ -3,8 +3,8 @@ set -e
 mkdir -p /data
 mkdir -p ./build/certs
 
-cp ./conf/nginx.conf ./build/conf
-cp ./conf/nginx.conf.server ./build/conf
+cp ./conf/nginx.conf.template ./build/conf
+cp ./conf/nginx.conf.server.template ./build/conf
 
 # Enable transparent mode if not explicitly disabled
 mkdir -p ./build/conf/transparent_proxy
