@@ -1,3 +1,3 @@
 set -e
 
-for i in ./logs/*; do cat /dev/null > $i; done
+for i in $LOG_DIR/*; do cat /dev/null > $i; done
