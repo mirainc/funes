@@ -105,7 +105,7 @@ server {
     proxy_connect_address               127.0.0.1:444;
 
     location / {
-        proxy_set_header Host            $host;
+        proxy_set_header Host            $http_host;
         proxy_set_header X-Forwarded-For $remote_addr;
 
         proxy_pass $proxy_cache_backend;
@@ -135,12 +135,12 @@ server {
     add_header Funes-Cache-Status $upstream_cache_status;
 
     location / {
-        proxy_set_header Host            $host;
+        proxy_set_header Host            $http_host;
         proxy_set_header X-Forwarded-For $remote_addr;
 
         proxy_pass $proxy_rewrite_backend;
         proxy_cache fwd_proxy_cache;
-        proxy_cache_key $proxy_method$request_method$host$uri$is_args$args;
+        proxy_cache_key $proxy_method$request_method$http_host$request_uri;
 
         ## This config serves stale responses when updating the cache.
         ## Use when immediate updates are not necessary.
@@ -196,7 +196,7 @@ server {
     expires $cache_expiry;
 
     location / {
-        proxy_pass $forward_proxy_scheme://$host$uri$is_args$args;
+        proxy_pass $forward_proxy_scheme://$http_host$request_uri;
 
         proxy_ssl_verify on;
         proxy_ssl_verify_depth 2;
@@ -237,10 +237,10 @@ server {
     location / {
         add_header Funes-Cache-Status $upstream_cache_status;
 
-        proxy_pass $forward_range_proxy_scheme://$host$uri$is_args$args;
+        proxy_pass $forward_range_proxy_scheme://$http_host$request_uri;
         proxy_ignore_headers X-Accel-Expires Expires Cache-Control Set-Cookie Vary;
         proxy_cache fwd_proxy_cache;
-        proxy_cache_key $forward_range_proxy_scheme$request_method$host$uri$is_args$args$slice_range;
+        proxy_cache_key $forward_range_proxy_scheme$request_method$http_host$request_uri$slice_range;
         proxy_cache_use_stale error timeout;
         proxy_cache_background_update off;
         proxy_cache_valid 200 206 3650d;
