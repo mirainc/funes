@@ -1,2 +1,2 @@
-requests
-sultan
+requests==2.21.0
+sultan==0.8.1
