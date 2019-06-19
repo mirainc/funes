@@ -20,6 +20,21 @@ Inside the `build` directory, `sh run.sh` to start the application.
 
 `make package` can be run to zip the `build` directory to `package/funes.zip`. The zip can be extracted and run elsewhere.
 
+
+#### Build options
+
+The following build options are available using environment variables:
+
+```bash
+DISABLE_TRANSPARENT_PROXY       # Disable the transparent proxy on port 80/443
+RESTRICT_LOCAL                  # Disallow all connections except those from 127.0.0.1/24
+```
+
+Usage example:
+```bash
+DISABLE_TRANSPARENT_PROXY=1 RESTRICT_LOCAL=1 make
+```
+
 ### Build for Docker
 
 ```
@@ -28,8 +43,6 @@ docker run -d -p 3128:3128 <created_image_id>
 ```
 
 ## Development
-
-This assumes you are using `docker-machine` on a Mac.
 
 ```
 make dev
@@ -55,13 +68,11 @@ In `conf/nginx.conf.server`, expiration rules can be set for URI (`$uri_expiry`)
 
 ## Configuring browser proxy
 
-These assume that you are running `docker-machine` on port `192.168.99.100` with the port configuration set in `docker-compose.yml`.
-
 ### Chrome
 
 Start chrome with the following flag:
 ```
---proxy-server="https=192.168.99.100:3128;http=192.168.99.100:3128"
+--proxy-server="https=127.0.0.1:3128;http=127.0.0.1:3128"
 ```
 
 ### Electron
