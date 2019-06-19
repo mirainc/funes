@@ -76,6 +76,7 @@ map $http_range $proxy_cache_backend {
 
 server {
     include ./transparent_proxy/*.conf;
+    include ./restrict_local/*.conf;
     listen 444 ssl;
     listen 3128;
 
@@ -123,6 +124,7 @@ map $server_port $proxy_method {
 }
 
 server {
+    include ./restrict_local/*.conf;
     listen 3129;
     listen 3130;
 
@@ -182,6 +184,7 @@ map $server_port $forward_proxy_scheme {
 }
 
 server {
+    include ./restrict_local/*.conf;
     listen 4480;
     listen 4443;
 
@@ -218,6 +221,7 @@ map $server_port $forward_range_proxy_scheme {
 }
 
 server {
+    include ./restrict_local/*.conf;
     listen 4481;
     listen 4444;
 
