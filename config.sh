@@ -16,9 +16,15 @@ fi
 
 mkdir -p ./build/conf/restrict_local
 if [ -z "${RESTRICT_LOCAL}" ]; then
-    rm -rf ./build/conf/restrict_local/*
+    rm -rf ./build/conf/restrict_local/restrict_local.conf
 else
-    cp ./conf/restrict_local/*.conf ./build/conf/restrict_local
+    cp ./conf/restrict_local/restrict_local.conf ./build/conf/restrict_local
+fi
+
+if [ -z "${RESTRICT_LOCAL_DOCKER}" ]; then
+    rm -rf ./build/conf/restrict_local/restrict_local_docker.conf
+else
+    cp ./conf/restrict_local/restrict_local_docker.conf ./build/conf/restrict_local
 fi
 
 cp ./certs/nginx.crt ./build/conf
