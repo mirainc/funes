@@ -26,13 +26,22 @@ Inside the `build` directory, `sh run.sh` to start the application.
 The following build options are available using environment variables:
 
 ```bash
-DISABLE_TRANSPARENT_PROXY       # Disable the transparent proxy on port 80/443
-RESTRICT_LOCAL                  # Disallow all connections except those from 127.0.0.1/24
+# Disable the transparent proxy on port 80/443
+DISABLE_TRANSPARENT_PROXY
+
+# Disallow all connections except those from 127.0.0.1/24
+RESTRICT_LOCAL
+
+# Disallow all connections except from 127.0.0.1/24 and Docker IPs (172.18, 172.19, 172.21 prefixes)
+# Cannot be combined with RESTRICT_LOCAL
+RESTRICT_LOCAL_DOCKER
 ```
 
 Usage example:
 ```bash
 DISABLE_TRANSPARENT_PROXY=1 RESTRICT_LOCAL=1 make
+
+DISABLE_TRANSPARENT_PROXY=1 RESTRICT_LOCAL_DOCKER=1 make
 ```
 
 ### Build for Docker

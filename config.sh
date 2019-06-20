@@ -21,6 +21,13 @@ else
     cp ./conf/restrict_local/*.conf ./build/conf/restrict_local
 fi
 
+mkdir -p ./build/conf/restrict_local_docker
+if [ -z "${RESTRICT_LOCAL_DOCKER}" ]; then
+    rm -rf ./build/conf/restrict_local_docker/*
+else
+    cp ./conf/restrict_local_docker/*.conf ./build/conf/restrict_local_docker
+fi
+
 cp ./certs/nginx.crt ./build/conf
 cp ./certs/nginx.key ./build/conf
 cp ./certs/cacert.pem ./build/conf
