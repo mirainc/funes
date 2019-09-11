@@ -58,15 +58,35 @@ map $scheme $proxied_by_value {
     "https"   "funes-ssl";
 }
 
+upstream localhost_3129 {
+    keepalive 128;
+    server 127.0.0.1:3129;
+}
+
+upstream localhost_3130 {
+    keepalive 128;
+    server 127.0.0.1:3130;
+}
+
+upstream localhost_4481 {
+    keepalive 128;
+    server 127.0.0.1:4481;
+}
+
+upstream localhost_4444 {
+    keepalive 128;
+    server 127.0.0.1:4444;
+}
+
 ## Proxy destination based on scheme
 map $scheme $normal_proxy_cache_backend {
-    "http"      http://127.0.0.1:3129;
-    "https"     http://127.0.0.1:3130;
+    "http"      http://localhost_3129;
+    "https"     http://localhost_3130;
 }
 
 map $scheme $range_proxy_cache_backend {
-    "http"      http://127.0.0.1:4481;
-    "https"     http://127.0.0.1:4444;
+    "http"      http://localhost_4481;
+    "https"     http://localhost_4444;
 }
 
 map $http_range $proxy_cache_backend {
@@ -113,9 +133,19 @@ server {
 
 # ====================== General Cache Proxy ====================== #
 
+upstream localhost_4480 {
+    keepalive 128;
+    server 127.0.0.1:4480;
+}
+
+upstream localhost_4443 {
+    keepalive 128;
+    server 127.0.0.1:4443;
+}
+
 map $server_port $proxy_rewrite_backend {
-    3129    http://127.0.0.1:4480;
-    3130    http://127.0.0.1:4443;
+    3129    http://localhost_4480;
+    3130    http://localhost_4443;
 }
 
 map $server_port $proxy_method {
