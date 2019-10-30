@@ -41,6 +41,11 @@ map $uri $uri_expiry {
     # "~*.gifv"                 30d;                        # example of expiry by uri/file extension
 }
 
+map $request_method $cache_expiry {
+    default                     $uri_expiry;
+    'HEAD'                      5s;
+}
+
 # ====================== End Expiration Rules ====================== #
 
 
@@ -156,7 +161,7 @@ server {
         proxy_send_timeout 4s;
 
         ## Set valid cached response types.
-        ## The time here is overridden by our injected `expires $uri_expiry` header.
+        ## The time here is overridden by our injected `expires $cache_expiry` header.
         proxy_cache_valid 200 206 1s;
 
         access_log ${LOG_DIR}/cache.log proxy_cache;
@@ -190,7 +195,7 @@ server {
 
     add_header Funes-Proxied-By $forward_proxied_by_value;
 
-    expires $uri_expiry;
+    expires $cache_expiry;
 
     location / {
         resolver 8.8.8.8;
