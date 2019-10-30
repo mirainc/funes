@@ -33,6 +33,10 @@ def fetch(url, headers=None):
     return requests.get(url, proxies=proxies, headers=headers, verify=False)
 
 
+def head(url):
+    return requests.head(url, proxies=proxies, verify=False)
+
+
 def clear_cache():
     result = s.rm('-rf /data/funes_rmb_cache/*').run()
     if result.rc != 0:
@@ -147,6 +151,32 @@ class CacheTests(unittest.TestCase):
 
     def test_get_hls(self):
         self.case_fetch_uncached_resource(HLS_STREAM_URL)
+
+    def test_head_http_image(self):
+        r = head(HTTP_IMAGE_URL)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.headers['Funes-Cache-Status'], 'MISS')
+
+        r = head(HTTP_IMAGE_URL)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.headers['Funes-Cache-Status'], 'HIT')
+
+        time.sleep(6)
+        r = head(HTTP_IMAGE_URL)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.headers['Funes-Cache-Status'], 'EXPIRED')
+
+        r = head(HTTP_IMAGE_URL)
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r.headers['Funes-Cache-Status'], 'HIT')
+
+        if can_disable_network():
+            disable_network()
+
+            time.sleep(6)
+            r = head(HTTP_IMAGE_URL)
+            self.assertEqual(r.status_code, 200)
+            self.assertEqual(r.headers['Funes-Cache-Status'], 'STALE')
 
     def test_get_expired_ssl(self):
         r = fetch(EXPIRED_SSL_URL)
