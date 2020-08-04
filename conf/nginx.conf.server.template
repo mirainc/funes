@@ -48,6 +48,7 @@ map $uri $uri_expiry {
 map $request_method $cache_expiry {
     default                     $uri_expiry;
     'HEAD'                      5s;
+    'OPTIONS'                   5s;
 }
 
 # ====================== End Expiration Rules ====================== #
