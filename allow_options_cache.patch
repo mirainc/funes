@@ -1,0 +1,24 @@
+From e0992d22a5a83a1222c2f0538755004cbd760c32 Mon Sep 17 00:00:00 2001
+From: Aric Huang <arichuang@gmail.com>
+Date: Mon, 3 Aug 2020 17:41:03 -0700
+Subject: [PATCH] allowing caching OPTIONS requests
+
+---
+ src/http/ngx_http_upstream.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/http/ngx_http_upstream.c b/src/http/ngx_http_upstream.c
+index 47f98ccb..88519b63 100644
+--- a/src/http/ngx_http_upstream.c
++++ b/src/http/ngx_http_upstream.c
+@@ -455,6 +455,7 @@ ngx_conf_bitmask_t  ngx_http_upstream_cache_method_mask[] = {
+     { ngx_string("GET"), NGX_HTTP_GET },
+     { ngx_string("HEAD"), NGX_HTTP_HEAD },
+     { ngx_string("POST"), NGX_HTTP_POST },
++    { ngx_string("OPTIONS"), NGX_HTTP_OPTIONS},
+     { ngx_null_string, 0 }
+ };
+
+--
+2.24.2 (Apple Git-127)
+
