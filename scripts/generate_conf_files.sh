@@ -4,5 +4,17 @@ if [ -z "$LOG_DIR" ]
 then
     export LOG_DIR="./logs"
 fi
+
+# Uncomment for testing
+# export NAMESERVER="127.0.0.11"
+if [ -z "$NAMESERVER" ]; then
+	# This is the recommended method for finding the local nameserver using /etc/resolv.conf.
+	# https://trac.nginx.org/nginx/ticket/658
+	export NAMESERVER=`cat /etc/resolv.conf | grep "nameserver" | awk '{print $2}' | tr '\n' ' '`
+fi
+
+echo "Nameserver is: $NAMESERVER"
+
+echo "Copying nginx config"
 envsubst '${LOG_DIR}' < ./conf/nginx.conf.template > ./conf/nginx.conf
-envsubst '${LOG_DIR}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server
+envsubst '${NAMESERVER} ${LOG_DIR}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server

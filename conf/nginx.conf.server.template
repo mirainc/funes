@@ -1,13 +1,17 @@
 ## Cache configuration
 proxy_cache_path /data/funes_rmb_cache levels=1:2 keys_zone=fwd_proxy_cache:10m max_size=10g inactive=365d use_temp_path=off;
 proxy_cache_convert_head off;
-proxy_cache_methods GET HEAD;
+# Normally, nginx does not support caching OPTIONS requests because the HTTP standard says OPTIONS is not cacheable.
+# However, we need to be able to cache OPTIONS requests, since browsers use OPTIONS responses for CORS security policies.
+# This requires applying the patch allow_options_cache.patch in this repository.
+proxy_cache_methods GET HEAD OPTIONS;
 proxy_cache_lock on;
 
 ## Ignore headers that make requests uncacheable
 proxy_ignore_headers Set-Cookie Vary X-Accel-Buffering;
 proxy_buffering on;
 
+resolver ${NAMESERVER} ipv6=off valid=10s;
 
 # ====================== Expiration Rules ====================== #
 
@@ -44,6 +48,7 @@ map $uri $uri_expiry {
 map $request_method $cache_expiry {
     default                     $uri_expiry;
     'HEAD'                      5s;
+    'OPTIONS'                   5s;
 }
 
 # ====================== End Expiration Rules ====================== #
@@ -94,19 +99,14 @@ server {
     proxy_connect_allow                 443 563;
 
     # read/send_timeout are used to keep the connection open to the client
-    # even if no data is sent on the proxy. Normally this is set to ~60s, but
-    # that is causing issues with the cache - it takes a long time to respond
-    # to stale requests, maybe because it's trying to use an open channel.
-    # Keeping these timeouts low seems to alleviate that problem.
-    proxy_connect_connect_timeout       10s;
-    proxy_connect_read_timeout          10s;
-    proxy_connect_send_timeout          10s;
+    # even if no data is sent on the proxy. This defaults to 60s if not set.
+    # proxy_connect_connect_timeout       60s;
+    # proxy_connect_read_timeout          60s;
+    # proxy_connect_send_timeout          60s;
     proxy_connect_address               127.0.0.1:444;
 
     location / {
-        resolver 8.8.8.8;
-
-        proxy_set_header Host            $host;
+        proxy_set_header Host            $http_host;
         proxy_set_header X-Forwarded-For $remote_addr;
 
         proxy_pass $proxy_cache_backend;
@@ -136,12 +136,12 @@ server {
     add_header Funes-Cache-Status $upstream_cache_status;
 
     location / {
-        proxy_set_header Host            $host;
+        proxy_set_header Host            $http_host;
         proxy_set_header X-Forwarded-For $remote_addr;
 
         proxy_pass $proxy_rewrite_backend;
         proxy_cache fwd_proxy_cache;
-        proxy_cache_key $proxy_method$request_method$host$uri$is_args$args;
+        proxy_cache_key $proxy_method$request_method$http_host$request_uri;
 
         ## This config serves stale responses when updating the cache.
         ## Use when immediate updates are not necessary.
@@ -154,11 +154,10 @@ server {
         proxy_cache_use_stale error timeout http_500 http_502 http_503 http_504;
         proxy_cache_background_update off;
 
-        # These timeouts ensure that the stale cache is used quickly if network
-        # goes down. The timeouts are for time to first byte, not entire request duration.
-        proxy_connect_timeout 1s;
-        proxy_read_timeout 4s;
-        proxy_send_timeout 4s;
+        # These timeouts can be tuned (read nginx documentation for more info)
+        # proxy_connect_timeout 1s;
+        # proxy_read_timeout 60s;
+        # proxy_send_timeout 60s;
 
         ## Set valid cached response types.
         ## The time here is overridden by our injected `expires $cache_expiry` header.
@@ -198,9 +197,7 @@ server {
     expires $cache_expiry;
 
     location / {
-        resolver 8.8.8.8;
-
-        proxy_pass $forward_proxy_scheme://$host$uri$is_args$args;
+        proxy_pass $forward_proxy_scheme://$http_host$request_uri;
 
         proxy_ssl_verify on;
         proxy_ssl_verify_depth 2;
@@ -239,14 +236,12 @@ server {
     expires max;
 
     location / {
-        resolver 8.8.8.8;
-
         add_header Funes-Cache-Status $upstream_cache_status;
 
-        proxy_pass $forward_range_proxy_scheme://$host$uri$is_args$args;
+        proxy_pass $forward_range_proxy_scheme://$http_host$request_uri;
         proxy_ignore_headers X-Accel-Expires Expires Cache-Control Set-Cookie Vary;
         proxy_cache fwd_proxy_cache;
-        proxy_cache_key $forward_range_proxy_scheme$request_method$host$uri$is_args$args$slice_range;
+        proxy_cache_key $forward_range_proxy_scheme$request_method$http_host$request_uri$slice_range;
         proxy_cache_use_stale error timeout;
         proxy_cache_background_update off;
         proxy_cache_valid 200 206 3650d;

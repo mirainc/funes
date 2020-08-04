@@ -30,20 +30,6 @@ diff -r c5f81dcf97a7 src/http/ngx_http_core_module.c
      clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
  
      if (clcf->try_files == NULL) {
-diff -r c5f81dcf97a7 src/http/ngx_http_core_module.h
---- a/src/http/ngx_http_core_module.h	Thu Mar 03 21:14:19 2016 +0300
-+++ b/src/http/ngx_http_core_module.h	Thu Mar 10 15:41:41 2016 +0800
-@@ -343,6 +343,10 @@
- #endif
- #endif
- 
-+#if (NGX_HTTP_PROXY_CONNECT)
-+    unsigned      accept_connect:1;
-+#endif
-+
-     ngx_http_location_tree_node_t   *static_locations;
- #if (NGX_PCRE)
-     ngx_http_core_loc_conf_t       **regex_locations;
 diff -r c5f81dcf97a7 src/http/ngx_http_parse.c
 --- a/src/http/ngx_http_parse.c	Thu Mar 03 21:14:19 2016 +0300
 +++ b/src/http/ngx_http_parse.c	Thu Mar 10 15:41:41 2016 +0800
@@ -279,28 +265,6 @@ diff -r c5f81dcf97a7 src/http/ngx_http_request.c
          if (r->host_start) {
              r->host_start = new + (r->host_start - old);
              if (r->host_end) {
-@@ -1838,6 +1898,21 @@
- 
-     c = r->connection;
- 
-+#if (NGX_HTTP_PROXY_CONNECT)
-+
-+    ngx_http_core_loc_conf_t    *clcf;
-+
-+    clcf = ngx_http_get_module_loc_conf(r, ngx_http_core_module);
-+
-+    if (r->method == NGX_HTTP_CONNECT && !clcf->accept_connect) {
-+        ngx_log_error(NGX_LOG_INFO, c->log, 0,
-+                      "client sent connect method");
-+        ngx_http_finalize_request(r, NGX_HTTP_BAD_REQUEST);
-+        return;
-+    }
-+
-+#endif
-+
- #if (NGX_HTTP_SSL)
- 
-     if (r->http_connection->ssl) {
 diff -r c5f81dcf97a7 src/http/ngx_http_request.h
 --- a/src/http/ngx_http_request.h	Thu Mar 03 21:14:19 2016 +0300
 +++ b/src/http/ngx_http_request.h	Thu Mar 10 15:41:41 2016 +0800

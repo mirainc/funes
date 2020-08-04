@@ -35,6 +35,8 @@ if (defined $ENV{TEST_DISABLE_REWRITE_PHASE}) {
 
 print("+ test_enable_rewrite_phase: $test_enable_rewrite_phase\n");
 
+plan(skip_all => 'No rewrite phase enabled') if ($test_enable_rewrite_phase == 0);
+
 # --- init DNS server ---
 
 my $bind_pid;
@@ -45,8 +47,8 @@ my %route_map;
 
 # A record
 my %aroute_map = (
-    'www.test-a.com' => [[300, "127.0.0.1"]],
-    'www.test-b.com' => [[300, "127.0.0.1"]],
+    'test-connect-timeout.com' => [[300, "8.8.8.8"]],
+    'test-read-timeout.com' => [[300, "8.8.8.8"]],
 );
 
 # AAAA record (ipv6)
@@ -77,58 +79,41 @@ http {
     %%TEST_GLOBALS_HTTP%%
 
     log_format connect '$remote_addr - $remote_user [$time_local] "$request" '
-                       '$status $body_bytes_sent var:$connect_host-$connect_port-$connect_addr';
+                       '$status $body_bytes_sent var:$connect_host-$connect_port-$connect_addr '
+                       ' c:$proxy_connect_connect_timeout,s:$proxy_connect_send_timeout,r:$proxy_connect_read_timeout';
 
     access_log %%TESTDIR%%/connect.log connect;
+    error_log %%TESTDIR%%/connect_error.log error;
 
     resolver 127.0.0.1:18085 ipv6=off;      # NOTE: cannot connect ipv6 address ::1 in mac os x.
-
-    server {
-        listen  8081;
-        listen  8082;   # address.com
-        listen  8083;   # bind.conm
-        server_name server_8081;
-        access_log off;
-        location / {
-            return 200 "backend server: addr:$remote_addr port:$server_port host:$host\n";
-        }
-    }
 
     server {
         listen       127.0.0.1:8080;
         server_name  localhost;
 
-        set $proxy_remote_address "";
-        set $proxy_local_address "";
         # forward proxy for CONNECT method
         proxy_connect;
-        proxy_connect_allow 443 80 8081;
+        proxy_connect_allow all;
         proxy_connect_connect_timeout 10s;
         proxy_connect_read_timeout 10s;
         proxy_connect_send_timeout 10s;
         proxy_connect_send_lowat 0;
-        proxy_connect_address $proxy_remote_address;
-        proxy_connect_bind $proxy_local_address;
 
-        if ($host = "address.com") {
-            set $proxy_remote_address "127.0.0.1:8082";
+        set $proxy_connect_connect_timeout  "101ms";
+        set $proxy_connect_send_timeout     "102ms";
+        set $proxy_connect_read_timeout     "103ms";
+
+        if ($host = "test-connect-timeout.com") {
+            set $proxy_connect_connect_timeout "1ms";
         }
-
-        if ($host = "bind.com") {
-            set $proxy_remote_address "127.0.0.1:8083";
-            set $proxy_local_address "127.0.0.1";   # NOTE that we cannot bind 127.0.0.3 in mac os x.
-        }
-
-        if ($host = "proxy-remote-address-resolve-domain.com") {
-            set $proxy_remote_address "www.test-a.com:8081";
+        if ($host = "test-read-timeout.com") {
+            set $proxy_connect_connect_timeout  "3ms";
+            set $proxy_connect_read_timeout     "1ms";
+            set $proxy_connect_send_timeout     "2ms";
         }
 
         location / {
             proxy_pass http://127.0.0.1:8081;
-        }
-
-        location = /hello {
-            return 200 "world";
         }
 
         # used to output connect.log
@@ -136,15 +121,13 @@ http {
             access_log off;
             root %%TESTDIR%%/;
         }
-    }
 
-    server {
-        listen       127.0.0.1:8080;
-        server_name  forbidden.example.com;
+        # used to output error.log
+        location = /connect_error.log {
+            access_log off;
+            root %%TESTDIR%%/;
+        }
 
-        # It will forbid CONNECT request without proxy_connect command enabled.
-
-        return 200;
     }
 }
 
@@ -164,119 +147,30 @@ if ($@) {
     $t->run();
 }
 
-like(http_connect_request('127.0.0.1', '8081', '/'), qr/backend server/, '200 Connection Established');
-like(http_connect_request('www.test-a.com', '8081', '/'), qr/host:www\.test-a\.com/, '200 Connection Established server name');
-like(http_connect_request('www.test-b.com', '8081', '/'), qr/host:www\.test-b\.com/, '200 Connection Established server name');
-like(http_connect_request('www.no-dns-reply.com', '80', '/'), qr/502/, '200 Connection Established server name');
-like(http_connect_request('127.0.0.1', '9999', '/'), qr/403/, '200 Connection Established not allowed port');
-like(http_get('/'), qr/backend server/, 'Get method: proxy_pass');
-like(http_get('/hello'), qr/world/, 'Get method: return 200');
-like(http_connect_request('forbidden.example.com', '8080', '/'), qr/400 Bad Request/, 'forbid CONNECT request without proxy_connect command enabled');
+#if (not $test_enable_rewrite_phase) {
+#  exit
+#}
 
-# proxy_remote_address directive supports dynamic domain resolving.
-like(http_connect_request('proxy-remote-address-resolve-domain.com', '8081', '/'),
-     qr/host:proxy-remote-address-resolve-domain\.com/,
-     'proxy_remote_address supports dynamic domain resovling');
+my $log;
+my $errlog;
 
-if ($test_enable_rewrite_phase) {
-    like(http_connect_request('address.com', '8081', '/'), qr/backend server: addr:127.0.0.1 port:8082/, 'set remote address');
-    like(http_connect_request('bind.com', '8081', '/'), qr/backend server: addr:127.0.0.1 port:8083/, 'set local address and remote address');
+TODO: {
+    local $TODO = '# This case will pass, if connecting 8.8.8.8 timed out.';
+    like(http_connect_request('test-connect-timeout.com', '8888', '/'), qr/504/, 'connect timed out: set $var');
+    $log = http_get('/connect.log');
+    like($log, qr/"CONNECT test-connect-timeout.com:8888 HTTP\/1.1" 504 .+ c:1,s:102,r:103/,
+        'connect timed out log: get $var & status=504');
+    $errlog = http_get('/connect_error.log');
+    like($errlog, qr/proxy_connect: upstream connect timed out \(peer:8\.8\.8\.8:8888\) while connecting to upstream/,
+        'connect timed out error log');
 }
 
+http_connect_request('test-read-timeout.com', '8888', '/');
 
-# test $connect_host, $connect_port
-my $log = http_get('/connect.log');
-like($log, qr/CONNECT 127\.0\.0\.1:8081.*var:127\.0\.0\.1-8081-127\.0\.0\.1:8081/, '$connect_host, $connect_port, $connect_addr');
-like($log, qr/CONNECT www\.no-dns-reply\.com:80.*var:www\.no-dns-reply\.com-80--/, 'dns resolver fail');
-
-$t->stop();
-
-###############################################################################
-
-$t->write_file_expand('nginx.conf', <<'EOF');
-
-%%TEST_GLOBALS%%
-
-daemon         off;
-
-events {
-}
-
-http {
-    %%TEST_GLOBALS_HTTP%%
-
-    access_log off;
-
-    server {
-        listen  8082;
-        location / {
-            return 200 "backend server: $remote_addr $server_port\n";
-        }
-    }
-
-    server {
-        listen       127.0.0.1:8080;
-        server_name  localhost;
-
-        # forward proxy for CONNECT method
-
-        proxy_connect;
-        proxy_connect_allow all;
-
-        proxy_connect_address 127.0.0.1:8082;
-
-        if ($host = "if-return-skip.com") {
-            return 200 "if-return\n";
-        }
-
-        return 200 "skip proxy connect: $host,$uri,$request_uri,$args\n";
-    }
-}
-
-EOF
-
-
-$t->run();
-if ($test_enable_rewrite_phase) {
-    like(http_connect_request('address.com', '8081', '/'), qr/skip proxy connect/, 'skip proxy connect module without rewrite phase enabled');
-    like(http_connect_request('if-return-skip.com', '8081', '/'), qr/if-return/, 'skip proxy connect module without rewrite phase enabled: if/return');
-} else {
-    like(http_connect_request('address.com', '8081', '/'), qr/backend server: 127.0.0.1 8082/, 'set remote address without nginx variable');
-}
-$t->stop();
-
-###############################################################################
-
-$t->write_file_expand('nginx.conf', <<'EOF');
-
-%%TEST_GLOBALS%%
-
-daemon         off;
-
-events {
-}
-
-http {
-    %%TEST_GLOBALS_HTTP%%
-
-    access_log off;
-
-    server {
-        listen       127.0.0.1:8080;
-        proxy_connect;
-        proxy_connect_allow all;
-    }
-}
-
-EOF
-
-
-$t->run();
-
-$t->write_file('test.html', 'test page');
-
-like(http_get('/test.html'), qr/test page/, '200 for default root directive without location {}');
-like(http_get('/404'), qr/ 404 Not Found/, '404 for default root directive without location {}');
+# test $proxy_connect_*_timeout
+$log = http_get('/connect.log');
+like($log, qr/"CONNECT test-connect-timeout.com:8888 HTTP\/1.1" ... .+ c:1,s:102,r:103/, 'connect timed out log: get $var');
+like($log, qr/"CONNECT test-read-timeout.com:8888 HTTP\/1.1" ... .+ c:3,s:2,r:1/, 'connect/send/read timed out log: get $var');
 
 $t->stop();
 
