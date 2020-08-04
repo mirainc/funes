@@ -27,11 +27,11 @@ patch: extract
 
 extract: download
 	mkdir -p extract
-	tar -xzvf download/nginx-1.12.1.tar.gz -C extract
+	tar -xzvf download/nginx-1.18.0.tar.gz -C extract
 
 download:
 	mkdir -p download
-	wget -P download http://nginx.org/download/nginx-1.12.1.tar.gz
+	wget -P download http://nginx.org/download/nginx-1.18.0.tar.gz
 
 clean: clean-build clean-download clean-extract clean-package
 
@@ -40,7 +40,7 @@ clean-build:
 
 clean-extract:
 	rm -rf extract
-	rm patch
+	rm -rf patch
 
 clean-download:
 	rm -rf download
