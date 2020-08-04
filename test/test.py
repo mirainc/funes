@@ -21,7 +21,7 @@ proxies = {
 
 HTTP_IMAGE_URL = 'http://www.webmfiles.org/wp-content/uploads/2010/05/webm-files.jpg'
 HTTPS_IMAGE_URL = 'https://i.imgur.com/3YBkyf6.jpg'
-HTTPS_VIDEO_URL = 'https://prefetch-video-sample.storage.googleapis.com/gbike.webm'
+HTTPS_VIDEO_URL = 'http://dl5.webmfiles.org/big-buck-bunny_trailer.webm'
 RSS_URL = 'http://www.avclub.com/rss'
 HLS_STREAM_URL = 'http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8'
 EXPIRED_SSL_URL = 'https://expired.badssl.com'
