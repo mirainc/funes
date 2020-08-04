@@ -4,6 +4,9 @@ A forward proxy with caching.
 
 *"I was struck by the thought that every word I spoke, every expression of my face or motion of my hand would endure in his implacable memory..."*
 
+Uses: https://github.com/chobits/ngx_http_proxy_connect_module/tree/96ae4e06381f821218f368ad0ba964f87cbe0266
+(code copied to `ngx_http_proxy_connect_module`). Code is copied instead of using submodule as Github doesn't support including submodule code in releases.
+
 ## Start
 
 funes listens on ports 80, 443, and 3128. By default it will cache all GET requests for 1 minute, with certain content types having longer expirations (see `conf/nginx.conf.server`). It will serve stale responses indefinitely if there is no network connection.
