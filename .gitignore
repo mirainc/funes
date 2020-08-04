@@ -1,7 +1,7 @@
 *.pyc
-cache
-build
-patch
-download
-extract
-package
+/cache
+/build
+/patch
+/download
+/extract
+/package
