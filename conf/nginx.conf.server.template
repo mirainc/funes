@@ -8,6 +8,7 @@ proxy_cache_lock on;
 proxy_ignore_headers Set-Cookie Vary X-Accel-Buffering;
 proxy_buffering on;
 
+resolver ${NAMESERVER} ipv6=off valid=10s;
 
 # ====================== Expiration Rules ====================== #
 
@@ -98,14 +99,12 @@ server {
     # that is causing issues with the cache - it takes a long time to respond
     # to stale requests, maybe because it's trying to use an open channel.
     # Keeping these timeouts low seems to alleviate that problem.
-    proxy_connect_connect_timeout       10s;
-    proxy_connect_read_timeout          10s;
-    proxy_connect_send_timeout          10s;
+    # proxy_connect_connect_timeout       10s;
+    # proxy_connect_read_timeout          10s;
+    # proxy_connect_send_timeout          10s;
     proxy_connect_address               127.0.0.1:444;
 
     location / {
-        resolver 8.8.8.8;
-
         proxy_set_header Host            $host;
         proxy_set_header X-Forwarded-For $remote_addr;
 
@@ -156,9 +155,9 @@ server {
 
         # These timeouts ensure that the stale cache is used quickly if network
         # goes down. The timeouts are for time to first byte, not entire request duration.
-        proxy_connect_timeout 1s;
-        proxy_read_timeout 4s;
-        proxy_send_timeout 4s;
+        # proxy_connect_timeout 1s;
+        # proxy_read_timeout 4s;
+        # proxy_send_timeout 4s;
 
         ## Set valid cached response types.
         ## The time here is overridden by our injected `expires $cache_expiry` header.
@@ -198,8 +197,6 @@ server {
     expires $cache_expiry;
 
     location / {
-        resolver 8.8.8.8;
-
         proxy_pass $forward_proxy_scheme://$host$uri$is_args$args;
 
         proxy_ssl_verify on;
@@ -239,8 +236,6 @@ server {
     expires max;
 
     location / {
-        resolver 8.8.8.8;
-
         add_header Funes-Cache-Status $upstream_cache_status;
 
         proxy_pass $forward_range_proxy_scheme://$host$uri$is_args$args;
