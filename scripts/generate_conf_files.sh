@@ -8,6 +8,8 @@ fi
 # Uncomment for testing
 # export NAMESERVER="127.0.0.11"
 if [ -z "$NAMESERVER" ]; then
+	# This is the recommended method for finding the local nameserver using /etc/resolv.conf.
+	# https://trac.nginx.org/nginx/ticket/658
 	export NAMESERVER=`cat /etc/resolv.conf | grep "nameserver" | awk '{print $2}' | tr '\n' ' '`
 fi
 
