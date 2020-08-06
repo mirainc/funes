@@ -140,6 +140,23 @@ http {
             return ret
         end
 
+        function set_cert(common_name)
+            local key_data, cert_data = get_cert_from_disk(common_name)
+            if key_data and cert_data then
+                local ok, err = ssl.set_der_priv_key(key_data)
+                if not ok then
+                    ngx.log(ngx.ERR, "failed to set DER priv key: ", err)
+                    return false
+                end
+                local ok, err = ssl.set_der_cert(cert_data)
+                if not ok then
+                    ngx.log(ngx.ERR, "failed to set DER cert: ", err)
+                    return false
+                end
+                return true
+            end
+        end
+
         ssl.clear_certs()
 
         local common_name = ssl.server_name()
@@ -147,18 +164,8 @@ http {
             common_name = "unknown"
         end
 
-        local key_data, cert_data = get_cert_from_disk(common_name)
-        if key_data and cert_data then
-            local ok, err = ssl.set_der_priv_key(key_data)
-            if not ok then
-                ngx.log(ngx.ERR, "failed to set DER priv key: ", err)
-                return
-            end
-            local ok, err = ssl.set_der_cert(cert_data)
-            if not ok then
-                ngx.log(ngx.ERR, "failed to set DER cert: ", err)
-                return
-            end
+        local ok = set_cert(common_name)
+        if ok then
             return
         end
 
@@ -193,18 +200,8 @@ http {
 
 
         -- read the newly generated cert from disk and return.
-        local key_data, cert_data = get_cert_from_disk(common_name)
-        if key_data and cert_data then
-            local ok, err = ssl.set_der_priv_key(key_data)
-            if not ok then
-                ngx.log(ngx.ERR, "failed to set DER priv key: ", err)
-                return
-            end
-            local ok, err = ssl.set_der_cert(cert_data)
-            if not ok then
-                ngx.log(ngx.ERR, "failed to set DER cert: ", err)
-                return
-            end
+        local ok = set_cert(common_name)
+        if ok then
             return
         end
 
