@@ -6,4 +6,4 @@ set -e
 
 sh ./generate_conf_files.sh
 
-./sbin/nginx -p $(pwd) -g 'daemon off;'
+./bin/openresty -p $(pwd) -g 'daemon off;'

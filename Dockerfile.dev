@@ -19,4 +19,13 @@ EXPOSE 80 443 3128
 
 WORKDIR /usr/src/app
 
+COPY certs ./certs
+COPY conf ./conf
+COPY ngx_http_proxy_connect_module ./ngx_http_proxy_connect_module
+COPY scripts ./scripts
+COPY test ./test
+COPY allow_options_cache.patch .
+COPY *.sh ./
+COPY Makefile .
+
 CMD ["make run"]

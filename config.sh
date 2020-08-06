@@ -2,6 +2,11 @@ set -e
 
 mkdir -p /data
 mkdir -p ./build/certs
+mkdir -p ./build/logs
+
+# Copy Openresty Nginx conf to current dir.
+rm -rf ./build/conf
+cp -r ./build/nginx/conf ./build
 
 cp ./conf/nginx.conf.template ./build/conf
 cp ./conf/nginx.conf.server.template ./build/conf
