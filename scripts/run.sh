@@ -6,4 +6,7 @@ set -e
 
 sh ./generate_conf_files.sh
 
+mkdir -p /data/funes/cert_cache
+chown -R www-data:www-data /data/funes
+
 ./bin/openresty -p $(pwd) -g 'daemon off;'

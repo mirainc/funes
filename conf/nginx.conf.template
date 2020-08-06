@@ -75,12 +75,11 @@ http {
     ssl_certificate     ./nginx.crt;
     ssl_certificate_key ./nginx.key;
     ssl_certificate_by_lua_block {
-        local ffi = require "ffi"
         local ssl = require "ngx.ssl"
         local resty_lock = require "resty.lock"
 
         function cert_disk_locations(common_name)
-            local disk_cache_dir = "/tmp";
+            local disk_cache_dir = "/data/funes/cert_cache";
             local private_key_der = string.format("%s/%s_privatekey.pem", disk_cache_dir, common_name)
             local cert_der = string.format("%s/%s_cert.pem", disk_cache_dir, common_name)
             return private_key_der, cert_der
