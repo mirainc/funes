@@ -90,9 +90,6 @@ server {
     listen 444 ssl;
     listen 3128;
 
-    ssl_certificate     ./nginx.crt;
-    ssl_certificate_key ./nginx.key;
-
     add_header Funes-Proxied-By $proxied_by_value;
 
     proxy_connect;

@@ -1,5 +1,9 @@
 default: install
 
+dev-build:
+	docker-compose kill
+	docker-compose -f docker-compose.yml build # --no-cache
+
 dev:
 	sh dev.sh
 
