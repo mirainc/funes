@@ -12,8 +12,7 @@ RUN apt-get -y install libssl-dev
 # RUN apt-get -y install dnsmasq
 
 # Install debugging tools
-# RUN apt-get -y install dnsutils curl vim tcptrack
-RUN apt-get -y install curl
+RUN apt-get -y install dnsutils curl vim tcptrack
 
 EXPOSE 80 443 3128
 
