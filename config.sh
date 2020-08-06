@@ -1,6 +1,6 @@
 set -e
 
-mkdir -p /data
+mkdir -p /data/funes_rmb_cache
 mkdir -p ./build/certs
 mkdir -p ./build/logs
 
