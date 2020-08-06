@@ -37,7 +37,6 @@ clean-build:
 
 clean-extract:
 	rm -rf extract
-	rm -rf patch
 
 clean-download:
 	rm -rf download
