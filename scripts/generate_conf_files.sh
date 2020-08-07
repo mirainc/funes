@@ -1,8 +1,51 @@
+#!/bin/bash
 # Generate configuration files from templates.
-# envs: LOG_DIR
+
+# Root CA cert config.
+if [ ! -z "$ROOT_CA_CERT" ] && [ ! -z "$ROOT_CA_KEY" ]; then
+	echo "Using root CA cert: $ROOT_CA_CERT $ROOT_CA_KEY"
+	while true; do
+		if test -f "$ROOT_CA_CERT" && test -f "$ROOT_CA_KEY"; then
+			echo "Root CA cert found"
+			break
+		else
+			echo "Specified root CA cert files not found, retrying in 5s"
+			sleep 5
+		fi
+	done
+else
+	echo "Using default root CA cert"
+	# generate and use the
+	export ROOT_CA_CERT=/data/funes/root_ca.crt
+	export ROOT_CA_KEY=/data/funes/root_ca.key
+	if test -f "$ROOT_CA_CERT" && test -f "$ROOT_CA_KEY"; then
+	    echo "Default root CA files exist"
+	else
+		echo "Default root CA files missing, generating..."
+		openssl req -x509 -outform PEM -new -nodes -newkey rsa:2048 -days 365 -out $ROOT_CA_CERT -subj "/C=US/ST=California/L=San Francisco/O=Funes Signing Authority/CN=Funes Signing Authority" -keyout $ROOT_CA_KEY
+	fi
+fi
+
+## Run this if you want to add the root CA cert to local certificate store.
+# cp $ROOT_CA_CERT /usr/local/share/ca-certificates/
+# update-ca-certificates
+
 if [ -z "$LOG_DIR" ]
 then
     export LOG_DIR="./logs"
+fi
+
+if [ -z "$CONTENT_CACHE_DIR" ]
+then
+	export CONTENT_CACHE_DIR="/data/funes/content_cache"
+fi
+if [ -z "$CONTENT_CACHE_KEYS_ZONE" ]
+then
+	export CONTENT_CACHE_KEYS_ZONE="10m"
+fi
+if [ -z "$CONTENT_CACHE_SIZE" ]
+then
+	export CONTENT_CACHE_SIZE="10g"
 fi
 
 # Uncomment for testing
@@ -17,4 +60,5 @@ echo "Nameserver is: $NAMESERVER"
 
 echo "Copying nginx config"
 envsubst '${LOG_DIR}' < ./conf/nginx.conf.template > ./conf/nginx.conf
-envsubst '${NAMESERVER} ${LOG_DIR}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server
+envsubst '${NAMESERVER} ${LOG_DIR} ${CONTENT_CACHE_DIR} ${CONTENT_CACHE_KEYS_ZONE} ${CONTENT_CACHE_SIZE}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server
+envsubst '${ROOT_CA_CERT} ${ROOT_CA_KEY}' < ./conf/generate_ssl_certs.template.lua > ./conf/generate_ssl_certs.lua

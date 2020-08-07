@@ -1,5 +1,5 @@
 ## Cache configuration
-proxy_cache_path /data/funes/content_cache levels=1:2 keys_zone=fwd_proxy_cache:10m max_size=10g inactive=365d use_temp_path=off;
+proxy_cache_path ${CONTENT_CACHE_DIR} levels=1:2 keys_zone=fwd_proxy_cache:${CONTENT_CACHE_KEYS_ZONE} max_size=${CONTENT_CACHE_SIZE} inactive=365d use_temp_path=off;
 proxy_cache_convert_head off;
 # Normally, nginx does not support caching OPTIONS requests because the HTTP standard says OPTIONS is not cacheable.
 # However, we need to be able to cache OPTIONS requests, since browsers use OPTIONS responses for CORS security policies.

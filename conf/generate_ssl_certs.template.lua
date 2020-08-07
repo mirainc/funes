@@ -12,7 +12,7 @@ function unlock_or_exit(lock)
 end
 
 function root_ca_disk_locations()
-    return "/data/funes/root_ca.crt", "/data/funes/root_ca.key"
+    return "${ROOT_CA_CERT}", "${ROOT_CA_KEY}"
 end
 
 function cert_disk_locations(common_name)
