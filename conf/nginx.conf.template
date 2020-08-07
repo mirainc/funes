@@ -75,8 +75,18 @@ http {
     ssl_certificate     ./nginx.crt;
     ssl_certificate_key ./nginx.key;
     ssl_certificate_by_lua_block {
+        -- Inspired by:
+        -- https://blog.dutchcoders.io/openresty-with-dynamic-generated-certificates/
         local ssl = require "ngx.ssl"
         local resty_lock = require "resty.lock"
+
+        function unlock_or_exit(lock)
+            local ok, err = lock:unlock()
+            if not ok then
+                ngx.log(ngx.ERR, "failed to unlock: ", err)
+                return ngx.exit(ngx.ERROR)
+            end
+        end
 
         function cert_disk_locations(common_name)
             local disk_cache_dir = "/data/funes/cert_cache";
@@ -164,19 +174,29 @@ http {
             common_name = "unknown"
         end
 
+        -- try to set the self-signed certificate on the response.
+        -- this will succeed if a cert has already been generated.
         local ok = set_cert(common_name)
         if ok then
             return
         end
 
-        -- Create a new certificate --
+        -- otherwise, we need to create a new certificate.
 
-        -- prevent creating same certificate twice using lock
+        -- prevent creating same certificate twice using lock.
         local lock = resty_lock:new("my_locks")
         local elapsed, err = lock:lock(common_name)
         if not elapsed then
             ngx.log(ngx.ERR, "failed to acquire the lock: ", err)
             return ngx.exit(ngx.ERROR)
+        end
+
+        -- try to set the cert again, in case it was created by another thread.
+        local ok = set_cert(common_name)
+        if ok then
+            -- unlock to avoid deadlock
+            unlock_or_exit(lock)
+            return
         end
 
         -- generate new private key
@@ -185,19 +205,14 @@ http {
         -- call openssl to create a new self-signed certificate in the disk cache.
         local ret = generate_self_signed_cert(common_name)
 
-        -- unlock to avoid deadlocking
-        local ok, err = lock:unlock()
-        if not ok then
-            ngx.log(ngx.ERR, "failed to unlock: ", err)
-            return ngx.exit(ngx.ERROR)
-        end
+        -- unlock immediately after generating the cert.
+        unlock_or_exit(lock)
 
         -- check whether openssl call succeeded.
         if not ret == 0 then
             ngx.log(ngx.ERR, string.format("failed to generate certificate: %d", ret))
             return ngx.exit(ngx.ERROR)
         end
-
 
         -- read the newly generated cert from disk and return.
         local ok = set_cert(common_name)
