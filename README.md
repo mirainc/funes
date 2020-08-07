@@ -7,6 +7,11 @@ A forward proxy with caching.
 Uses: https://github.com/chobits/ngx_http_proxy_connect_module/tree/96ae4e06381f821218f368ad0ba964f87cbe0266
 (code copied to `ngx_http_proxy_connect_module`). Code is copied instead of using submodule as Github doesn't support including submodule code in releases.
 
+## Dependencies
+
+- `faketime`
+- `openssl` (tested with version 1.0.2g)
+
 ## Start
 
 funes listens on ports 80, 443, and 3128. By default it will cache all GET requests for 1 minute, with certain content types having longer expirations (see `conf/nginx.conf.server`). It will serve stale responses indefinitely if there is no network connection.
@@ -19,7 +24,7 @@ make
 
 This will compile Nginx and place all required files in the `build` directory.
 
-Inside the `build` directory, `sh run.sh` to start the application.
+Inside the `build` directory, `bash run.sh` to start the application.
 
 `make package` can be run to zip the `build` directory to `package/funes.zip`. The zip can be extracted and run elsewhere.
 
@@ -57,10 +62,15 @@ docker run -d -p 3128:3128 <created_image_id>
 ## Development
 
 ```
-make dev
+make dev-build 		# Builds the docker container
+make dev        	# Starts container and runs Funes.
 ```
 
 will start a local development instance in Docker.
+
+If you have not made any changes between runs of the Docker container, you can run `make dev` again to avoid having to rebuild Openresty.
+
+After making changes, run `make dev-build` again to rebuild the container and pull in changes.
 
 ### Testing Changes
 

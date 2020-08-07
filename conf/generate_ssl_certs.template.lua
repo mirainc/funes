@@ -86,7 +86,7 @@ end
 -- Sign a CSR using the root CA cert and key.
 function sign_csr(common_name, root_ca_cert, root_ca_key)
     local private_key, csr, signed_cert = cert_disk_locations(common_name)
-    local openssl_command = string.format("/bin/bash -c 'RANDFILE=/data/funes/.rnd openssl x509 -req -extfile <(printf \"subjectAltName=DNS:%s\") -days 365 -in %s -CA %s -CAkey %s -CAcreateserial -out %s'", common_name, csr, root_ca_cert, root_ca_key, signed_cert)
+    local openssl_command = string.format("faketime yesterday /bin/bash -c 'RANDFILE=/data/funes/.rnd openssl x509 -req -extfile <(printf \"subjectAltName=DNS:%s\") -days 365 -in %s -CA %s -CAkey %s -CAcreateserial -out %s'", common_name, csr, root_ca_cert, root_ca_key, signed_cert)
     ngx.log(ngx.ERR, openssl_command)
     local ret = os.execute(openssl_command)
     return ret
