@@ -89,15 +89,15 @@ http {
             local key_data = nil;
             local cert_data = nil;
 
-            -- fetch the private key from disk
             local private_key_der, cert_der = cert_disk_locations(common_name)
 
+            -- fetch the private key from disk
             local f = io.open(private_key_der, "r")
             if f then
                 key_data = f:read("*a")
                 f:close()
             else
-                ngx.log(ngx.ERR, "Failed to read private key data from disk")
+                ngx.log(ngx.WARN, "Failed to read private key data from disk")
             end
 
             -- fetch the cert data from disk
@@ -106,7 +106,7 @@ http {
                 cert_data = f:read("*a")
                 f:close()
             else
-                ngx.log(ngx.ERR, "Failed to read cert data from disk")
+                ngx.log(ngx.WARN, "Failed to read cert data from disk")
             end
 
             -- return key_data, cert_data
@@ -134,7 +134,7 @@ http {
         function generate_self_signed_cert(common_name)
             local private_key_der, cert_der = cert_disk_locations(common_name)
             local openssl_command = string.format("openssl req -x509 -outform PEM -nodes -days 365 -newkey rsa:2048 -keyout %s -out %s -subj \"/C=US/ST=California/L=San Francisco/O=Funes/CN=%s\"", private_key_der, cert_der, common_name)
-            ngx.log(ngx.ERR, openssl_command)
+            -- ngx.log(ngx.ERR, openssl_command)
             local ret = os.execute(openssl_command)
             return ret
         end
@@ -145,15 +145,16 @@ http {
                 local ok, err = ssl.set_der_priv_key(key_data)
                 if not ok then
                     ngx.log(ngx.ERR, "failed to set DER priv key: ", err)
-                    return false
+                    return ngx.exit(ngx.ERROR)
                 end
                 local ok, err = ssl.set_der_cert(cert_data)
                 if not ok then
                     ngx.log(ngx.ERR, "failed to set DER cert: ", err)
-                    return false
+                    return ngx.exit(ngx.ERROR)
                 end
                 return true
             end
+            return false
         end
 
         ssl.clear_certs()
