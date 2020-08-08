@@ -79,6 +79,7 @@ If you have not made any changes between runs of the Docker container, you can r
 After making changes, run `make dev-build` again to rebuild the container and pull in changes.
 
 If run with default settings, you will see the generated root CA cert in Docker stdout, e.g.:
+
 ```
 -----BEGIN CERTIFICATE-----
 MIIDzzCCAregAwIBAgIJAL0LMN2/s8xBMA0GCSqGSIb3DQEBCwUAMH4xCzAJBgNV
@@ -86,6 +87,15 @@ MIIDzzCCAregAwIBAgIJAL0LMN2/s8xBMA0GCSqGSIb3DQEBCwUAMH4xCzAJBgNV
 ...
 -----END CERTIFICATE-----
 ```
+
+You may copy everything in this block into a file with a `.crt` extension and add it to your local system's certificates. For example, on Debian/Ubuntu you can run:
+
+```
+sudo cp <COPIED_CERT_FILE>.crt /usr/local/share/ca-certificates/
+sudo update-ca-certificates
+```
+
+Or on Mac: https://www.eduhk.hk/ocio/content/faq-how-add-root-certificate-mac-os-x
 
 ### Testing Changes
 
