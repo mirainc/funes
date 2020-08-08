@@ -52,7 +52,7 @@ function get_file_with_mem_cache(filename)
         f:close()
 
         -- set data in cache 
-        cert_mem_cache:set(filename, data)
+        cert_mem_cache:set(filename, data, ${CERT_CACHE_TTL_SEC})
     else
         ngx.log(ngx.WARN, "Failed to read data from disk: ", filename)
     end
