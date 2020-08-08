@@ -10,7 +10,6 @@ services:
     - "3128:3128"
     # volumes:
     # - ./:/usr/src/app/:rw
-    command: bash -c "make run"
     # command: ["sleep", "infinity"]
     environment:
     - HELLO=WORLD

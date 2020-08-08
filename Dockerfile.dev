@@ -28,4 +28,4 @@ COPY allow_options_cache.patch .
 COPY *.sh ./
 COPY Makefile .
 
-CMD ["make run"]
+CMD ["make", "run"]
