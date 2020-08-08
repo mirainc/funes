@@ -28,6 +28,9 @@ else
 		echo "Default root CA files missing, generating..."
 		openssl req -x509 -outform PEM -new -nodes -newkey rsa:2048 -days 365 -out $ROOT_CA_CERT -subj "/C=US/ST=California/L=San Francisco/O=Funes Signing Authority/CN=Funes Signing Authority" -keyout $ROOT_CA_KEY
 	fi
+	echo
+	cat $ROOT_CA_CERT
+	echo
 fi
 
 ## Run this if you want to add the root CA cert to local certificate store.
