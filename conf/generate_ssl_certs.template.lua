@@ -1,7 +1,7 @@
 -- Inspired by:
 -- https://blog.dutchcoders.io/openresty-with-dynamic-generated-certificates/
-local ssl = require "ngx.ssl"
-local resty_lock = require "resty.lock"
+
+-- requires initialize.lua to be run beforehand.
 
 function unlock_or_exit(lock)
     local ok, err = lock:unlock()
