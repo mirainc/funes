@@ -9,9 +9,5 @@ set -e
 echo "Generating configuration"
 bash ./generate_conf_files.sh
 
-# create the local data directory.
-mkdir -p /data/funes/cert_cache
-chown -R www-data:www-data /data/funes
-
 echo "Starting Funes"
 ./bin/openresty -p $(pwd) -g 'daemon off;'

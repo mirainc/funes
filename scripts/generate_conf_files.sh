@@ -1,6 +1,10 @@
 #!/bin/bash
 # Generate configuration files from templates.
 
+# create the local data directory.
+mkdir -p /data/funes/cert_cache
+chown -R www-data:www-data /data/funes
+
 # Root CA cert config.
 if [ ! -z "$ROOT_CA_CERT" ] && [ ! -z "$ROOT_CA_KEY" ]; then
 	echo "Using root CA cert: $ROOT_CA_CERT $ROOT_CA_KEY"
