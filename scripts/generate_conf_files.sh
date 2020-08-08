@@ -51,9 +51,9 @@ if [ -z "$CONTENT_CACHE_SIZE" ]
 then
 	export CONTENT_CACHE_SIZE="10g"
 fi
-if [ -z "$CERT_CACHE_TTL_SEC" ]
+if [ -z "$CERT_MEM_CACHE_TTL_SEC" ]
 then
-	export CERT_CACHE_TTL_SEC="3600"
+	export CERT_MEM_CACHE_TTL_SEC="3600"
 fi
 
 # Uncomment for testing
@@ -69,4 +69,4 @@ echo "Nameserver is: $NAMESERVER"
 echo "Copying nginx config"
 envsubst '${LOG_DIR}' < ./conf/nginx.conf.template > ./conf/nginx.conf
 envsubst '${NAMESERVER} ${LOG_DIR} ${CONTENT_CACHE_DIR} ${CONTENT_CACHE_KEYS_ZONE} ${CONTENT_CACHE_SIZE}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server
-envsubst '${ROOT_CA_CERT} ${ROOT_CA_KEY} ${CERT_CACHE_TTL_SEC}' < ./conf/generate_ssl_certs.template.lua > ./conf/generate_ssl_certs.lua
+envsubst '${ROOT_CA_CERT} ${ROOT_CA_KEY} ${CERT_MEM_CACHE_TTL_SEC}' < ./conf/generate_ssl_certs.template.lua > ./conf/generate_ssl_certs.lua
