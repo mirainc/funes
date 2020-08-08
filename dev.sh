@@ -2,4 +2,4 @@
 
 # run compose
 docker-compose kill
-docker-compose -f docker-compose.yml up
+docker-compose up --no-color 2>&1 | sed 's/^[^ ]*  *| //'

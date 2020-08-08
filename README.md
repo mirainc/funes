@@ -26,6 +26,12 @@ This will compile Nginx and place all required files in the `build` directory.
 
 Inside the `build` directory, `bash run.sh` to start the application.
 
+There are several helper scripts that are placed in in the `build` directory. These can be run manually or added to crontabs.
+- `logtruncate.sh`
+	- Truncates all logs from the Funes log directory.
+- `clear_cert_disk_cache.sh <AGE_MIN, default 1440> <CACHE_DIR, default /data/funes/cert_cache>`
+	- Clears any generated SSL cert files older than `AGE_MIN` from `CACHE_DIR`.
+
 `make package` can be run to zip the `build` directory to `package/funes.zip`. The zip can be extracted and run elsewhere.
 
 
@@ -71,6 +77,15 @@ will start a local development instance in Docker.
 If you have not made any changes between runs of the Docker container, you can run `make dev` again to avoid having to rebuild Openresty.
 
 After making changes, run `make dev-build` again to rebuild the container and pull in changes.
+
+If run with default settings, you will see the generated root CA cert in Docker stdout, e.g.:
+```
+-----BEGIN CERTIFICATE-----
+MIIDzzCCAregAwIBAgIJAL0LMN2/s8xBMA0GCSqGSIb3DQEBCwUAMH4xCzAJBgNV
+...
+...
+-----END CERTIFICATE-----
+```
 
 ### Testing Changes
 
