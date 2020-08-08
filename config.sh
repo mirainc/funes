@@ -9,6 +9,7 @@ cp -r ./build/nginx/conf ./build
 
 cp ./conf/nginx.conf.template ./build/conf
 cp ./conf/nginx.conf.server.template ./build/conf
+cp ./conf/*.lua ./build/conf
 
 # Enable transparent mode if not explicitly disabled
 mkdir -p ./build/conf/transparent_proxy
