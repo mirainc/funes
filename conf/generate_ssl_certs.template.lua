@@ -1,7 +1,18 @@
 -- Inspired by:
 -- https://blog.dutchcoders.io/openresty-with-dynamic-generated-certificates/
 
--- requires initialize.lua to be run beforehand.
+local ssl = require "ngx.ssl"
+local resty_lock = require "resty.lock"
+local lrucache = require "resty.lrucache"
+
+-- initialize memory caches for certs/keys.
+-- these lrucaches are NOT shared among nginx workers (https://github.com/openresty/lua-resty-lrucache).
+-- total cert + key size is ~3KB, and we store both in the cache.
+-- each nginx worker will use ~1MB for its memory cache.
+local cert_mem_cache, err = lrucache.new(600)
+if not cert_mem_cache then
+    error("failed to create the cache: " .. (err or "unknown"))
+end
 
 function unlock_or_exit(lock)
     local ok, err = lock:unlock()
@@ -27,29 +38,33 @@ function cert_info()
     return "US", "California", "San Francisco", "Raydiant"
 end
 
-function get_cert_from_disk(common_name)
-    local key_data = nil;
-    local cert_data = nil;
+function get_file_with_mem_cache(filename)
+    -- try fetching from cache first.
+    local data = cert_mem_cache:get(filename)
+    if data then
+        return data
+    end
 
+    -- if not present in cache, read from disk.
+    local f = io.open(filename, "r")
+    if f then
+        data = f:read("*a")
+        f:close()
+
+        -- set data in cache 
+        cert_mem_cache:set(filename, data)
+    else
+        ngx.log(ngx.WARN, "Failed to read data from disk: ", filename)
+    end
+
+    return data
+end
+
+function get_signed_cert(common_name)
     local private_key, csr, signed_cert = cert_disk_locations(common_name)
 
-    -- fetch the private key from disk
-    local f = io.open(private_key, "r")
-    if f then
-        key_data = f:read("*a")
-        f:close()
-    else
-        ngx.log(ngx.WARN, "Failed to read private key data from disk")
-    end
-
-    -- fetch the cert data from disk
-    local f = io.open(signed_cert, "r")
-    if f then
-        cert_data = f:read("*a")
-        f:close()
-    else
-        ngx.log(ngx.WARN, "Failed to read cert data from disk")
-    end
+    local key_data = get_file_with_mem_cache(private_key);
+    local cert_data = get_file_with_mem_cache(signed_cert);
 
     -- return key_data, cert_data
     if key_data and cert_data then
@@ -112,7 +127,7 @@ end
 -- Try to set the cert for a common name on the current response.
 -- Returns false if the cert doesn't exist.
 function set_cert(common_name)
-    local key_data, cert_data = get_cert_from_disk(common_name)
+    local key_data, cert_data = get_signed_cert(common_name)
     if key_data and cert_data then
         local ok, err = ssl.set_der_priv_key(key_data)
         if not ok then
