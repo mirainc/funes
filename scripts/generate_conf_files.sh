@@ -64,6 +64,7 @@ echo "Nameserver is: $NAMESERVER"
 
 echo "Copying nginx config"
 ls
+ls conf
 envsubst '${LOG_DIR}' < ./conf/nginx.conf.template > ./conf/nginx.conf
 envsubst '${NAMESERVER} ${LOG_DIR} ${CONTENT_CACHE_DIR} ${CONTENT_CACHE_KEYS_ZONE} ${CONTENT_CACHE_SIZE}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server
 envsubst '${ROOT_CA_CERT} ${ROOT_CA_KEY}' < ./conf/generate_ssl_certs.template.lua > ./conf/generate_ssl_certs.lua
