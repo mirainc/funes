@@ -1,5 +1,9 @@
 default: install
 
+dev-build:
+	docker-compose kill
+	docker-compose -f docker-compose.yml build # --no-cache
+
 dev:
 	sh dev.sh
 
@@ -19,19 +23,16 @@ install: build configure
 configure:
 	sh config.sh
 
-build: patch
+build: extract
 	sh build.sh
-
-patch: extract
-	sh patch.sh
 
 extract: download
 	mkdir -p extract
-	tar -xzvf download/nginx-1.18.0.tar.gz -C extract
+	tar -xzvf download/openresty-1.17.8.2.tar.gz -C extract
 
 download:
 	mkdir -p download
-	wget -P download http://nginx.org/download/nginx-1.18.0.tar.gz
+	wget -P download https://openresty.org/download/openresty-1.17.8.2.tar.gz
 
 clean: clean-build clean-download clean-extract clean-package
 
@@ -40,7 +41,6 @@ clean-build:
 
 clean-extract:
 	rm -rf extract
-	rm -rf patch
 
 clean-download:
 	rm -rf download

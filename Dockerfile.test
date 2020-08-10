@@ -7,6 +7,7 @@ RUN apt-get update
 RUN apt-get -y install wget patch build-essential libpcre3 libpcre3-dev gettext-base
 RUN apt-get -y install zlib1g-dev
 RUN apt-get -y install libssl-dev
+RUN apt-get -y install faketime
 
 # Install testing tools
 RUN apt-get -y install python python-setuptools python-pip net-tools

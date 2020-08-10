@@ -7,6 +7,7 @@ RUN apt-get update
 RUN apt-get -y install wget patch build-essential libpcre3 libpcre3-dev gettext-base
 RUN apt-get -y install zlib1g-dev
 RUN apt-get -y install libssl-dev
+RUN apt-get -y install faketime
 
 WORKDIR /usr/src/tmp
 COPY ./certs /usr/src/tmp/certs

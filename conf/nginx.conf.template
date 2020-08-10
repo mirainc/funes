@@ -32,8 +32,10 @@ http {
     # SSL Settings
     ##
 
+    ssl_session_cache  builtin:1000  shared:SSL:10m;
     ssl_protocols TLSv1 TLSv1.1 TLSv1.2; # Dropping SSLv3, ref: POODLE
     ssl_prefer_server_ciphers on;
+    # ssl_ciphers HIGH:!aNULL:!eNULL:!EXPORT:!CAMELLIA:!DES:!MD5:!PSK:!RC4;
 
     ##
     # Logging Settings
@@ -59,6 +61,23 @@ http {
     # gzip_buffers 16 8k;
     # gzip_http_version 1.1;
     # gzip_types text/plain text/css application/json application/javascript text/xml application/xml application/xml+rss text/javascript;
+
+
+    ##
+    # Lua Settings
+    ##
+
+    lua_shared_dict my_locks 100k;
+    lua_package_path "lua/?.lua;../lua-resty-core/lib/?.lua;;";
+    # This is relative to the openresty -p PATH value, unlike other nginx paths.
+    init_by_lua_file ./conf/initialize.lua;
+
+    ssl_certificate     ./nginx.crt;
+    ssl_certificate_key ./nginx.key;
+    # This is relative to the openresty -p PATH value, unlike other nginx paths.
+    ssl_certificate_by_lua_file ./conf/generate_ssl_certs.lua;
+
+    lua_need_request_body on;
 
     ##
     # Server Configuration

@@ -7,16 +7,25 @@ RUN apt-get update
 RUN apt-get -y install wget patch build-essential libpcre3 libpcre3-dev gettext-base
 RUN apt-get -y install zlib1g-dev
 RUN apt-get -y install libssl-dev
+RUN apt-get -y install faketime
 
 # Install dnsmasq. Only required if not using proxy_connect_rewrite
 # RUN apt-get -y install dnsmasq
 
 # Install debugging tools
-# RUN apt-get -y install dnsutils curl vim tcptrack
-RUN apt-get -y install curl
+RUN apt-get -y install dnsutils curl vim tcptrack
 
 EXPOSE 80 443 3128
 
 WORKDIR /usr/src/app
 
-CMD ["make run"]
+COPY certs ./certs
+COPY conf ./conf
+COPY ngx_http_proxy_connect_module ./ngx_http_proxy_connect_module
+COPY scripts ./scripts
+COPY test ./test
+COPY allow_options_cache.patch .
+COPY *.sh ./
+COPY Makefile .
+
+CMD ["make", "run"]

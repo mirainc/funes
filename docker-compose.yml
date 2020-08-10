@@ -8,9 +8,9 @@ services:
     - "80:80"
     - "443:443"
     - "3128:3128"
-    volumes:
-    - ./:/usr/src/app/:rw
-    command: bash -c "make run"
+    # volumes:
+    # - ./:/usr/src/app/:rw
+    # command: ["sleep", "infinity"]
     environment:
     - HELLO=WORLD
     # - RESTRICT_LOCAL=1
