@@ -37,3 +37,8 @@ cp ./certs/nginx.key ./build/conf
 cp ./certs/cacert.pem ./build/conf
 
 cp ./scripts/*.sh ./build
+
+# Replace the openresty symlink with the actual nginx binary to allow copying across systems.
+rm -rf ./build/bin/openresty
+cp ./build/nginx/sbin/nginx ./build/bin/openresty
+chmod +x ./build/bin/openresty
