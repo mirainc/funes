@@ -13,5 +13,6 @@ services:
     # command: ["bash", "-c", "sleep infinity"]
     environment:
     - HELLO=WORLD
+    - VERBOSE=true
     # - RESTRICT_LOCAL=1
     # - DISABLE_TRANSPARENT_PROXY=1

@@ -5,6 +5,11 @@
 mkdir -p /data/funes/cert_cache
 chown -R www-data:www-data /data/funes
 
+if [ -z "$VERBOSE" ]
+then
+	export VERBOSE=false
+fi
+
 # Root CA cert config.
 if [ ! -z "$ROOT_CA_CERT" ] && [ ! -z "$ROOT_CA_KEY" ]; then
 	echo "Using root CA cert: $ROOT_CA_CERT $ROOT_CA_KEY"
@@ -28,9 +33,11 @@ else
 		echo "Default root CA files missing, generating..."
 		openssl req -x509 -outform PEM -new -nodes -newkey rsa:2048 -days 365 -out $ROOT_CA_CERT -subj "/C=US/ST=California/L=San Francisco/O=Funes Signing Authority/CN=Funes Signing Authority" -keyout $ROOT_CA_KEY
 	fi
-	echo
-	cat $ROOT_CA_CERT
-	echo
+	if [ "$VERBOSE" != "false" ]; then
+		echo
+		cat $ROOT_CA_CERT
+		echo
+	fi
 fi
 
 # Give www-data access to the root CA cert and key.
