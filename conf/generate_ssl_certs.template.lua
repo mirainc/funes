@@ -93,7 +93,7 @@ function generate_csr(common_name)
     local private_key, csr, signed_cert = cert_disk_locations(common_name)
     local country, state, city, company = cert_info()
     local openssl_command = string.format("/bin/bash -c 'RANDFILE=/data/funes/.rnd openssl req -new -newkey rsa:2048 -keyout %s -nodes -out %s -subj \"/C=%s/ST=%s/L=%s/O=%s/CN=%s\"'", private_key, csr, country, state, city, company, common_name)
-    ngx.log(ngx.ERR, openssl_command)
+    ngx.log(ngx.DEBUG, openssl_command)
     local ret = os.execute(openssl_command)
     return ret
 end
@@ -102,7 +102,7 @@ end
 function sign_csr(common_name, root_ca_cert, root_ca_key)
     local private_key, csr, signed_cert = cert_disk_locations(common_name)
     local openssl_command = string.format("faketime yesterday /bin/bash -c 'RANDFILE=/data/funes/.rnd openssl x509 -req -extfile <(printf \"subjectAltName=DNS:%s\") -days 365 -in %s -CA %s -CAkey %s -CAcreateserial -out %s'", common_name, csr, root_ca_cert, root_ca_key, signed_cert)
-    ngx.log(ngx.ERR, openssl_command)
+    ngx.log(ngx.DEBUG, openssl_command)
     local ret = os.execute(openssl_command)
     return ret
 end

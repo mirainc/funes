@@ -33,6 +33,10 @@ else
 	echo
 fi
 
+# Give www-data access to the root CA cert and key.
+chown www-data $ROOT_CA_CERT
+chown www-data $ROOT_CA_KEY
+
 ## Run this if you want to add the root CA cert to local certificate store.
 # cp $ROOT_CA_CERT /usr/local/share/ca-certificates/
 # update-ca-certificates
