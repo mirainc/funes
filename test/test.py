@@ -19,7 +19,7 @@ proxies = {
 }
 
 
-HTTP_IMAGE_URL = 'http://www.webmfiles.org/wp-content/uploads/2010/05/webm-files.jpg'
+HTTP_IMAGE_URL = 'http://www.mixedcontentexamples.com/Content/Test/steveholt.jpg'
 HTTPS_IMAGE_URL = 'https://i.imgur.com/3YBkyf6.jpg'
 HTTPS_VIDEO_URL = 'https://dl5.webmfiles.org/big-buck-bunny_trailer.webm'
 RSS_URL = 'http://www.avclub.com/rss'
