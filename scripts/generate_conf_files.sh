@@ -13,12 +13,12 @@ fi
 # Root CA cert config.
 if [ ! -z "$ROOT_CA_CERT" ] && [ ! -z "$ROOT_CA_KEY" ]; then
 	echo "Using root CA cert: $ROOT_CA_CERT $ROOT_CA_KEY"
+	echo "Looking for root CA cert, will retry every 5s if not found"
 	while true; do
 		if test -f "$ROOT_CA_CERT" && test -f "$ROOT_CA_KEY"; then
 			echo "Root CA cert found"
 			break
 		else
-			echo "Specified root CA cert files not found, retrying in 5s"
 			sleep 5
 		fi
 	done
