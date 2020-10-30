@@ -70,6 +70,10 @@ http {
     ssl_certificate     ${ROOT_CA_CERT};
     ssl_certificate_key ${ROOT_CA_KEY};
 
+    # These lua paths are relative to the openresty -p PATH value, unlike other nginx paths.
+    lua_package_path "lua/?.lua;../lua-resty-core/lib/?.lua;lualib/?.lua;;";
+    lua_need_request_body on;
+
     include ./dynamic_certs/*.conf;
 
     ##
