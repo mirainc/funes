@@ -72,8 +72,6 @@ http {
 
     include ./dynamic_certs/*.conf;
 
-    lua_need_request_body on;
-
     ##
     # Server Configuration
     ##
