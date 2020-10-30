@@ -49,10 +49,15 @@ RESTRICT_LOCAL
 # Disallow all connections except from 127.0.0.1/24 and Docker IPs (172.18, 172.19, 172.21 prefixes)
 # Cannot be combined with RESTRICT_LOCAL
 RESTRICT_LOCAL_DOCKER
+
+# Disable dynamic SSL cert generation, instead passing the root cert on each response
+DISABLE_DYNAMIC_CERTS
 ```
 
 Usage example:
 ```bash
+DISABLE_TRANSPARENT_PROXY=1 DISABLE_DYNAMIC_CERTS=1 make
+
 DISABLE_TRANSPARENT_PROXY=1 RESTRICT_LOCAL=1 make
 
 DISABLE_TRANSPARENT_PROXY=1 RESTRICT_LOCAL_DOCKER=1 make

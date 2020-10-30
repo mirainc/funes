@@ -67,15 +67,10 @@ http {
     # Lua Settings
     ##
 
-    lua_shared_dict my_locks 100k;
-    lua_package_path "lua/?.lua;../lua-resty-core/lib/?.lua;lualib/?.lua;;";
-    # This is relative to the openresty -p PATH value, unlike other nginx paths.
-    init_by_lua_file ./conf/initialize.lua;
+    ssl_certificate     ${ROOT_CA_CERT};
+    ssl_certificate_key ${ROOT_CA_KEY};
 
-    ssl_certificate     ./nginx.crt;
-    ssl_certificate_key ./nginx.key;
-    # This is relative to the openresty -p PATH value, unlike other nginx paths.
-    ssl_certificate_by_lua_file ./conf/generate_ssl_certs.lua;
+    include ./dynamic_certs/*.conf;
 
     lua_need_request_body on;
 
