@@ -70,9 +70,10 @@ http {
     ssl_certificate     ${ROOT_CA_CERT};
     ssl_certificate_key ${ROOT_CA_KEY};
 
-    include ./dynamic_certs/*.conf;
-
+    lua_package_path "lua/?.lua;../lua-resty-core/lib/?.lua;lualib/?.lua;;";
     lua_need_request_body on;
+
+    include ./dynamic_certs/*.conf;
 
     ##
     # Server Configuration
