@@ -32,6 +32,13 @@ else
     cp ./conf/restrict_local/restrict_local_docker.conf ./build/conf/restrict_local
 fi
 
+mkdir -p ./build/conf/dynamic_certs
+if [ -z "${DISABLE_DYNAMIC_CERTS}" ]; then
+    cp ./conf/dynamic_certs/*.conf ./build/conf/dynamic_certs
+else
+    rm -rf ./build/conf/dynamic_certs/*.conf
+fi
+
 cp ./certs/nginx.crt ./build/conf
 cp ./certs/nginx.key ./build/conf
 cp ./certs/cacert.pem ./build/conf

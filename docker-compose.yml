@@ -16,3 +16,4 @@ services:
     - VERBOSE=true
     # - RESTRICT_LOCAL=1
     # - DISABLE_TRANSPARENT_PROXY=1
+    # - DISABLE_DYNAMIC_CERTS=1
