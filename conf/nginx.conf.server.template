@@ -244,7 +244,7 @@ server {
         proxy_cache_valid 200 206 3650d;
 
         proxy_ssl_verify on;
-        proxy_ssl_verify_depth 2;
+        proxy_ssl_verify_depth 3;
         proxy_ssl_trusted_certificate ./cacert.pem;
         proxy_ssl_server_name on;
 
