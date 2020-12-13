@@ -197,7 +197,7 @@ server {
         proxy_pass $forward_proxy_scheme://$http_host$request_uri;
 
         proxy_ssl_verify on;
-        proxy_ssl_verify_depth 2;
+        proxy_ssl_verify_depth 3;
         proxy_ssl_trusted_certificate ./cacert.pem;
         proxy_ssl_server_name on;
     }
