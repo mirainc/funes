@@ -39,6 +39,20 @@ else
     rm -rf ./build/conf/dynamic_certs/*.conf
 fi
 
+mkdir -p ./build/conf/forward_cache_expiry_override
+if [ -z "${DISABLE_FORWARD_CACHE_EXPIRY_OVERRIDE}" ]; then
+    cp ./conf/forward_cache_expiry_override/*.conf ./build/conf/forward_cache_expiry_override
+else
+    rm -rf ./build/conf/forward_cache_expiry_override/*.conf
+fi
+
+mkdir -p ./build/conf/range_cache_expiry_override
+if [ -z "${DISABLE_RANGE_CACHE_EXPIRY_OVERRIDE}" ]; then
+    cp ./conf/range_cache_expiry_override/*.conf ./build/conf/range_cache_expiry_override
+else
+    rm -rf ./build/conf/range_cache_expiry_override/*.conf
+fi
+
 cp ./certs/nginx.crt ./build/conf
 cp ./certs/nginx.key ./build/conf
 cp ./certs/cacert.pem ./build/conf
