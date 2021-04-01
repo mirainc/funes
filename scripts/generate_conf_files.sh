@@ -69,6 +69,14 @@ if [ -z "$CERT_MEM_CACHE_TTL_SEC" ]
 then
 	export CERT_MEM_CACHE_TTL_SEC="3600"
 fi
+if [ -z "$SSL_VERIFY_DEPTH" ]
+then
+	export SSL_VERIFY_DEPTH="3"
+fi
+if [ -z "$PROXY_BUFFER_SIZE" ]
+then
+	export PROXY_BUFFER_SIZE="4k"
+fi
 
 # Uncomment for testing
 # export NAMESERVER="127.0.0.11"
@@ -82,5 +90,5 @@ echo "Nameserver is: $NAMESERVER"
 
 echo "Copying nginx config"
 envsubst '${ROOT_CA_CERT} ${ROOT_CA_KEY} ${LOG_DIR}' < ./conf/nginx.conf.template > ./conf/nginx.conf
-envsubst '${NAMESERVER} ${LOG_DIR} ${CONTENT_CACHE_DIR} ${CONTENT_CACHE_KEYS_ZONE} ${CONTENT_CACHE_SIZE}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server
+envsubst '${NAMESERVER} ${LOG_DIR} ${CONTENT_CACHE_DIR} ${CONTENT_CACHE_KEYS_ZONE} ${CONTENT_CACHE_SIZE} ${SSL_VERIFY_DEPTH} ${PROXY_BUFFER_SIZE}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server
 envsubst '${ROOT_CA_CERT} ${ROOT_CA_KEY} ${CERT_MEM_CACHE_TTL_SEC}' < ./conf/generate_ssl_certs.template.lua > ./conf/generate_ssl_certs.lua

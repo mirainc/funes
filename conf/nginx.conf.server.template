@@ -160,6 +160,9 @@ server {
         ## The time here is overridden by our injected `expires $cache_expiry` header.
         proxy_cache_valid 200 206 1s;
 
+        ## Set proxy buffer size default 4k
+        proxy_buffer_size ${PROXY_BUFFER_SIZE};
+
         access_log ${LOG_DIR}/cache.log proxy_cache;
     }
 }
@@ -197,7 +200,7 @@ server {
         proxy_pass $forward_proxy_scheme://$http_host$request_uri;
 
         proxy_ssl_verify on;
-        proxy_ssl_verify_depth 3;
+        proxy_ssl_verify_depth ${SSL_VERIFY_DEPTH};
         proxy_ssl_trusted_certificate ./cacert.pem;
         proxy_ssl_server_name on;
     }
@@ -244,7 +247,7 @@ server {
         proxy_cache_valid 200 206 3650d;
 
         proxy_ssl_verify on;
-        proxy_ssl_verify_depth 3;
+        proxy_ssl_verify_depth ${SSL_VERIFY_DEPTH};
         proxy_ssl_trusted_certificate ./cacert.pem;
         proxy_ssl_server_name on;
 
