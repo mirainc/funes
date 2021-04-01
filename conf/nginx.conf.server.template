@@ -194,7 +194,7 @@ server {
 
     add_header Funes-Proxied-By $forward_proxied_by_value;
 
-    expires $cache_expiry;
+    include ./forward_cache_expiry_override/*.conf;
 
     location / {
         proxy_pass $forward_proxy_scheme://$http_host$request_uri;
@@ -233,7 +233,7 @@ server {
     slice 1m;
     proxy_set_header  Range $slice_range;
 
-    expires max;
+    include ./range_cache_expiry_override/*.conf;
 
     location / {
         add_header Funes-Cache-Status $upstream_cache_status;
