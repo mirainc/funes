@@ -160,9 +160,6 @@ server {
         ## The time here is overridden by our injected `expires $cache_expiry` header.
         proxy_cache_valid 200 206 1s;
 
-        ## Set proxy buffer size default 4k
-        proxy_buffer_size ${PROXY_BUFFER_SIZE};
-
         access_log ${LOG_DIR}/cache.log proxy_cache;
     }
 }
