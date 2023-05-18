@@ -1,2 +1,3 @@
 requests==2.22.0
 sultan==0.8.1
+certifi==2020.12.5
