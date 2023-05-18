@@ -21,7 +21,7 @@ proxies = {
 
 HTTP_IMAGE_URL = 'http://www.mixedcontentexamples.com/Content/Test/steveholt.jpg'
 HTTPS_IMAGE_URL = 'https://i.imgur.com/3YBkyf6.jpg'
-HTTPS_VIDEO_URL = 'https://dl5.webmfiles.org/big-buck-bunny_trailer.webm'
+HTTPS_VIDEO_URL = 'https://dl6.webmfiles.org/big-buck-bunny_trailer.webm'
 RSS_URL = 'http://www.avclub.com/rss'
 HLS_STREAM_URL = 'http://devimages.apple.com/iphone/samples/bipbop/bipbopall.m3u8'
 EXPIRED_SSL_URL = 'https://expired.badssl.com'
