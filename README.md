@@ -2,7 +2,7 @@
 
 A forward proxy with caching.
 
-*"I was struck by the thought that every word I spoke, every expression of my face or motion of my hand would endure in his implacable memory..."*
+_"I was struck by the thought that every word I spoke, every expression of my face or motion of my hand would endure in his implacable memory..."_
 
 Uses: https://github.com/chobits/ngx_http_proxy_connect_module/tree/96ae4e06381f821218f368ad0ba964f87cbe0266
 (code copied to `ngx_http_proxy_connect_module`). Code is copied instead of using submodule as Github doesn't support including submodule code in releases.
@@ -27,13 +27,13 @@ This will compile Nginx and place all required files in the `build` directory.
 Inside the `build` directory, `bash run.sh` to start the application.
 
 There are several helper scripts that are placed in in the `build` directory. These can be run manually or added to crontabs.
+
 - `logtruncate.sh`
-	- Truncates all logs from the Funes log directory.
+  - Truncates all logs from the Funes log directory.
 - `clear_cert_disk_cache.sh <AGE_MIN, default 1440> <CACHE_DIR, default /data/funes/cert_cache>`
-	- Clears any generated SSL cert files older than `AGE_MIN` from `CACHE_DIR`.
+  - Clears any generated SSL cert files older than `AGE_MIN` from `CACHE_DIR`.
 
 `make package` can be run to zip the `build` directory to `package/funes.zip`. The zip can be extracted and run elsewhere.
-
 
 #### Build options
 
@@ -55,6 +55,7 @@ DISABLE_DYNAMIC_CERTS
 ```
 
 Usage example:
+
 ```bash
 DISABLE_TRANSPARENT_PROXY=1 DISABLE_DYNAMIC_CERTS=1 make
 
@@ -82,7 +83,6 @@ will start a local development instance in Docker.
 If you have not made any changes between runs of the Docker container, you can run `make dev` again to avoid having to rebuild Openresty.
 
 After making changes, run `make dev-build` again to rebuild the container and pull in changes.
-
 
 ### SSL Certificates
 
@@ -130,6 +130,7 @@ In `conf/nginx.conf.server`, expiration rules can be set for URI (`$uri_expiry`)
 ### Chrome
 
 Start chrome with the following flag:
+
 ```
 --proxy-server="https=127.0.0.1:3128;http=127.0.0.1:3128"
 ```
@@ -137,6 +138,7 @@ Start chrome with the following flag:
 ### Electron
 
 Wrap your call to `<electron_window>.loadURL` following this example:
+
 ```
 mainWindow.webContents.session.setProxy({proxyRules:"https=192.168.99.100:3128;http=192.168.99.100:3128"}, function () {
       mainWindow.loadURL(url.format({
@@ -152,11 +154,15 @@ mainWindow.webContents.session.setProxy({proxyRules:"https=192.168.99.100:3128;h
 funes is meant to be used as a caching proxy for browser clients that need to function seamlessly if offline.
 
 When Chrome is configured to use a proxy `<proxy_host>:<proxy_port>`, it does the following
+
 1. Sends HTTP requests to `<proxy_host>:<proxy_port>` instead of `<external_host>:80`
-  - This request will contain a header `Host: <external_host`
+
+- This request will contain a header `Host: <external_host`
+
 2. Send a `CONNECT` request to `<proxy_host>:<proxy_port>`, which opens a tunnel to the proxy. Send the original request through the tunnel.
 
 funes responds to these requests:
+
 1. Send the request to `<external_host>:80`. Cache the result and return.
 2. Open a tunnel to `<funes_host>:443`, which then receives the original HTTPS request. Send the request to `<external_host>:443`. Cache the result and return.
 
@@ -172,3 +178,21 @@ The main proxy server uses Nginx, and the [Nginx Proxy Connect](https://github.c
 
 - Basic proxy setup taken from: https://stackoverflow.com/questions/46060028/how-to-use-nginx-as-forward-proxy-for-any-requested-location
 - Cache config for proxy_cache: https://www.nginx.com/blog/nginx-caching-guide/
+
+## Generating cacert.pem
+
+The [cacert.pem](./certs/cacert.pem) file needs to be periodically updated to contain the latest public certificate authorities. If not you may eventually see SSL failures for some domains that result in the following error:
+
+```
+upstream SSL certificate verify error: (20:unable to get local issuer certificate)
+```
+
+This can happen if the cert of the upstream server was created with a CA that does not exist in cacert.pem.
+
+To update cacert.pem run the following command:
+
+```bash
+perl scripts/mk-ca-bundle.pl
+```
+
+Copy the resulting ca-bundle.crt file to certs/cacert.pem.
