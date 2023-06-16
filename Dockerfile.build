@@ -17,7 +17,7 @@ COPY certs ./certs
 COPY conf ./conf
 COPY ngx_http_proxy_connect_module ./ngx_http_proxy_connect_module
 COPY scripts ./scripts
-COPY allow_options_cache.patch .
+COPY patches ./patches
 COPY *.sh ./
 COPY Makefile .
 
