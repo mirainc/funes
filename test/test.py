@@ -25,6 +25,7 @@ HTTPS_VIDEO_URL = 'https://mira-test-assets.s3.us-west-2.amazonaws.com/funes/vid
 RSS_URL = 'http://mira-test-assets.s3.us-west-2.amazonaws.com/funes/rss.xml'
 HLS_STREAM_URL = 'http://mira-test-assets.s3.us-west-2.amazonaws.com/funes/hls/hls.m3u8'
 EXPIRED_SSL_URL = 'https://expired.badssl.com'
+HTML_WITH_NO_CACHE_URL = 'https://mira-test-assets.s3.us-west-2.amazonaws.com/funes/force-cache.html'
 
 
 def fetch(url, headers=None):
@@ -181,3 +182,8 @@ class CacheTests(unittest.TestCase):
     def test_get_expired_ssl(self):
         r = fetch(EXPIRED_SSL_URL)
         self.assertEqual(r.status_code, 502)
+
+    def test_force_cache(self):
+        # This html file has a cache-control: no-cache header, but we should
+        # still cache it because we're forcing it with force_cacheable.patch.
+        self.case_fetch_resource(HTML_WITH_NO_CACHE_URL)
