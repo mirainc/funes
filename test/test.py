@@ -150,7 +150,7 @@ class CacheTests(unittest.TestCase):
         self.case_fetch_resource(RSS_URL, eta=5)
 
     def test_get_hls(self):
-        self.case_fetch_uncached_resource(HLS_STREAM_URL)
+        self.case_fetch_resource(HLS_STREAM_URL)
 
     def test_head_http_image(self):
         r = head(HTTP_IMAGE_URL)
