@@ -87,8 +87,8 @@ map $http_range $proxy_cache_backend {
 server {
     include ./transparent_proxy/*.conf;
     include ./restrict_local/*.conf;
-    listen 444 ssl;
-    listen 3128;
+    listen 127.0.0.1:444 ssl;
+    listen 127.0.0.1:3128;
 
     add_header Funes-Proxied-By $proxied_by_value;
 
@@ -127,8 +127,8 @@ map $server_port $proxy_method {
 
 server {
     include ./restrict_local/*.conf;
-    listen 3129;
-    listen 3130;
+    listen 127.0.0.1:3129;
+    listen 127.0.0.1:3130;
 
     add_header Funes-Cache-Status $upstream_cache_status;
 
@@ -186,8 +186,8 @@ map $server_port $forward_proxy_scheme {
 
 server {
     include ./restrict_local/*.conf;
-    listen 4480;
-    listen 4443;
+    listen 127.0.0.1:4480;
+    listen 127.0.0.1:4443;
 
     add_header Funes-Proxied-By $forward_proxied_by_value;
 
@@ -221,8 +221,8 @@ map $server_port $forward_range_proxy_scheme {
 
 server {
     include ./restrict_local/*.conf;
-    listen 4481;
-    listen 4444;
+    listen 127.0.0.1:4481;
+    listen 127.0.0.1:4444;
 
     add_header Funes-Proxied-By $forward_range_proxied_by_value;
 
