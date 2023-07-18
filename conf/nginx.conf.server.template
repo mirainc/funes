@@ -131,6 +131,7 @@ server {
     listen 127.0.0.1:3130;
 
     add_header Funes-Cache-Status $upstream_cache_status;
+    add_header Funes-Upstream-Status $upstream_status;
 
     location / {
         proxy_set_header Host            $http_host;
