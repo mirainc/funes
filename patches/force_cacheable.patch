@@ -1,0 +1,28 @@
+diff --git a/src/http/ngx_http_upstream.c b/src/http/ngx_http_upstream.c
+index 89e1319f9..4c037f43a 100644
+--- a/src/http/ngx_http_upstream.c
++++ b/src/http/ngx_http_upstream.c
+@@ -4622,7 +4622,7 @@ ngx_http_upstream_process_cache_control(ngx_http_request_t *r,
+         || ngx_strlcasestrn(start, last, (u_char *) "no-store", 8 - 1) != NULL
+         || ngx_strlcasestrn(start, last, (u_char *) "private", 7 - 1) != NULL)
+     {
+-        u->cacheable = 0;
++        u->cacheable = 1;
+         return NGX_OK;
+     }
+ 
+@@ -4647,12 +4647,12 @@ ngx_http_upstream_process_cache_control(ngx_http_request_t *r,
+                 continue;
+             }
+ 
+-            u->cacheable = 0;
++            u->cacheable = 1;
+             return NGX_OK;
+         }
+ 
+         if (n == 0) {
+-            u->cacheable = 0;
++            u->cacheable = 1;
+             return NGX_OK;
+         }
+ 

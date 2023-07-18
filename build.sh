@@ -8,6 +8,7 @@ cd ./extract/openresty-1.17.8.2
 
 # Patch nginx
 patch -d build/nginx-1.17.8/ -p 1 < $START_DIR/ngx_http_proxy_connect_module/patch/proxy_connect_rewrite_1018.patch
-patch -d build/nginx-1.17.8/ -p 1 < $START_DIR/allow_options_cache.patch
+patch -d build/nginx-1.17.8/ -p 1 < $START_DIR/patches/allow_options_cache.patch
+patch -d build/nginx-1.17.8/ -p 1 < $START_DIR/patches/force_cacheable.patch
 
 make && make install

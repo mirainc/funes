@@ -131,6 +131,7 @@ server {
     listen 127.0.0.1:3130;
 
     add_header Funes-Cache-Status $upstream_cache_status;
+    add_header Funes-Upstream-Status $upstream_status;
 
     location / {
         proxy_set_header Host            $http_host;
@@ -148,7 +149,7 @@ server {
         ## This config attempts to serve updated responses immediately,
         ## serving a stale response if there is an error/timeout.
         ## Use when immediate updates are preferred.
-        proxy_cache_use_stale error timeout http_500 http_502 http_503 http_504;
+        proxy_cache_use_stale error timeout http_500 http_502 http_503 http_504 http_403 http_404 http_429;
         proxy_cache_background_update off;
 
         # These timeouts can be tuned (read nginx documentation for more info)
