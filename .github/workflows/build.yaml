@@ -5,14 +5,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run: make install
+      - run:
+          make install
+          tar -czf funes-linux-amd64.tar.gz -C build ./
         env:
           DISABLE_TRANSPARENT_PROXY: "1"
           DISABLE_DYNAMIC_CERTS: "1"
           DISABLE_FORWARD_CACHE_EXPIRY_OVERRIDE: "1"
-      - name: Archive build folder
-        uses: actions/upload-artifact@v3
+      - name: Create Release
+        if: github.ref_type == "tag"
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         with:
-          name: build
-          path: |
-            build/
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload build
+        if: github.ref_type == "tag"
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: funes-linux-amd64.tar.gz
+          asset_name: funes-linux-amd64.tar.gz
+          asset_content_type: application/gzip
