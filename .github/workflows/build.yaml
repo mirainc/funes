@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - run:
+      - run: |
           make install
           tar -czf funes-linux-amd64.tar.gz -C build ./
         env:
