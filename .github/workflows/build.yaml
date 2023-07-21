@@ -13,7 +13,7 @@ jobs:
           DISABLE_DYNAMIC_CERTS: "1"
           DISABLE_FORWARD_CACHE_EXPIRY_OVERRIDE: "1"
       - name: Create Release
-        if: github.ref_type == "tag"
+        if: github.ref_type == 'tag'
         id: create_release
         uses: actions/create-release@v1
         env:
@@ -24,7 +24,7 @@ jobs:
           draft: false
           prerelease: false
       - name: Upload build
-        if: github.ref_type == "tag"
+        if: github.ref_type == 'tag'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ github.token }}
