@@ -4,7 +4,7 @@ START_DIR=$(pwd)
 
 cd ./extract/openresty-1.17.8.2
 
-./configure --prefix=$START_DIR/build --add-module=$START_DIR/ngx_http_proxy_connect_module --with-http_ssl_module --with-http_slice_module --with-luajit
+./configure --prefix=$START_DIR/build --add-module=$START_DIR/ngx_http_proxy_connect_module --with-http_ssl_module --with-http_slice_module --with-luajit  --with-ld-opt=-static
 
 # Patch nginx
 patch -d build/nginx-1.17.8/ -p 1 < $START_DIR/ngx_http_proxy_connect_module/patch/proxy_connect_rewrite_1018.patch
