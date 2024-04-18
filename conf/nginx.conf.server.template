@@ -100,6 +100,8 @@ server {
     # proxy_connect_connect_timeout       60s;
     # proxy_connect_read_timeout          60s;
     # proxy_connect_send_timeout          60s;
+    # if too low causes ERR_EMPTY_RESPONSE
+    proxy_connect_data_timeout          ${PROXY_CONNECT_DATA_TIMEOUT};
     proxy_connect_address               127.0.0.1:444;
 
     location / {
@@ -107,6 +109,9 @@ server {
         proxy_set_header X-Forwarded-For $remote_addr;
 
         proxy_pass $proxy_cache_backend;
+
+        # if too low causes "504 Gateway Timeout"
+        proxy_read_timeout ${PROXY_READ_DATA_TIMEOUT};
     }
 }
 

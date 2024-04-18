@@ -1,5 +1,5 @@
 diff --git a/src/http/ngx_http_core_module.c b/src/http/ngx_http_core_module.c
-index 6664fa6..0b2d433 100644
+index c7463dc..41a0a7a 100644
 --- a/src/http/ngx_http_core_module.c
 +++ b/src/http/ngx_http_core_module.c
 @@ -957,6 +957,14 @@ ngx_http_core_find_config_phase(ngx_http_request_t *r,
@@ -18,7 +18,7 @@ index 6664fa6..0b2d433 100644
  
      if (rc == NGX_ERROR) {
 diff --git a/src/http/ngx_http_parse.c b/src/http/ngx_http_parse.c
-index 20ad89a..c2c3c31 100644
+index 6460da2..7b209fa 100644
 --- a/src/http/ngx_http_parse.c
 +++ b/src/http/ngx_http_parse.c
 @@ -107,6 +107,14 @@ ngx_http_parse_request_line(ngx_http_request_t *r, ngx_buf_t *b)
@@ -36,21 +36,7 @@ index 20ad89a..c2c3c31 100644
          sw_spaces_before_uri,
          sw_schema,
          sw_schema_slash,
-@@ -246,6 +254,13 @@ ngx_http_parse_request_line(ngx_http_request_t *r, ngx_buf_t *b)
-                         r->method = NGX_HTTP_OPTIONS;
-                     }
- 
-+#if (NGX_HTTP_PROXY_CONNECT)
-+                    if (ngx_str7_cmp(m, 'C', 'O', 'N', 'N', 'E', 'C', 'T', ' '))
-+                    {
-+                        r->method = NGX_HTTP_CONNECT;
-+                    }
-+#endif
-+
-                     break;
- 
-                 case 8:
-@@ -267,6 +282,13 @@ ngx_http_parse_request_line(ngx_http_request_t *r, ngx_buf_t *b)
+@@ -270,6 +278,13 @@ ngx_http_parse_request_line(ngx_http_request_t *r, ngx_buf_t *b)
                  }
  
                  state = sw_spaces_before_uri;
@@ -64,7 +50,7 @@ index 20ad89a..c2c3c31 100644
                  break;
              }
  
-@@ -276,6 +298,111 @@ ngx_http_parse_request_line(ngx_http_request_t *r, ngx_buf_t *b)
+@@ -279,6 +294,111 @@ ngx_http_parse_request_line(ngx_http_request_t *r, ngx_buf_t *b)
  
              break;
  
@@ -165,7 +151,7 @@ index 20ad89a..c2c3c31 100644
 +            switch (ch) {
 +            case ' ':
 +                r->connect_port_end = p;
-+                state = sw_host_http_09;
++                state = sw_http_09;
 +                break;
 +            default:
 +                return NGX_HTTP_PARSE_INVALID_REQUEST;
@@ -177,10 +163,10 @@ index 20ad89a..c2c3c31 100644
          case sw_spaces_before_uri:
  
 diff --git a/src/http/ngx_http_request.c b/src/http/ngx_http_request.c
-index 136c461..d7adadd 100644
+index 013b715..f4fa0a4 100644
 --- a/src/http/ngx_http_request.c
 +++ b/src/http/ngx_http_request.c
-@@ -1112,6 +1112,55 @@ ngx_http_process_request_line(ngx_event_t *rev)
+@@ -1102,6 +1102,55 @@ ngx_http_process_request_line(ngx_event_t *rev)
                  r->http_protocol.len = r->request_end - r->http_protocol.data;
              }
  
@@ -229,14 +215,14 @@ index 136c461..d7adadd 100644
 +
 +                r->connect_port_n = port;
 +
-+                /* skip processing uri */
++                /* skip processing request uri */
 +            } else
 +#endif
 +
              if (ngx_http_process_request_uri(r) != NGX_OK) {
                  break;
              }
-@@ -1705,6 +1754,19 @@ ngx_http_alloc_large_header_buffer(ngx_http_request_t *r,
+@@ -1697,6 +1746,19 @@ ngx_http_alloc_large_header_buffer(ngx_http_request_t *r,
              r->schema_end = new + (r->schema_end - old);
          }
  
@@ -256,22 +242,25 @@ index 136c461..d7adadd 100644
          if (r->host_start) {
              r->host_start = new + (r->host_start - old);
              if (r->host_end) {
+@@ -2011,13 +2073,6 @@ ngx_http_process_request_header(ngx_http_request_t *r)
+         }
+     }
+ 
+-    if (r->method == NGX_HTTP_CONNECT) {
+-        ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
+-                      "client sent CONNECT method");
+-        ngx_http_finalize_request(r, NGX_HTTP_NOT_ALLOWED);
+-        return NGX_ERROR;
+-    }
+-
+     if (r->method == NGX_HTTP_TRACE) {
+         ngx_log_error(NGX_LOG_INFO, r->connection->log, 0,
+                       "client sent TRACE method");
 diff --git a/src/http/ngx_http_request.h b/src/http/ngx_http_request.h
-index 6dfb4a4..7b5cbdb 100644
+index b1269d2..a68bd03 100644
 --- a/src/http/ngx_http_request.h
 +++ b/src/http/ngx_http_request.h
-@@ -42,6 +42,10 @@
- #define NGX_HTTP_PATCH                     0x4000
- #define NGX_HTTP_TRACE                     0x8000
- 
-+#if (NGX_HTTP_PROXY_CONNECT)
-+#define NGX_HTTP_CONNECT                   0x10000
-+#endif
-+
- #define NGX_HTTP_CONNECTION_CLOSE          1
- #define NGX_HTTP_CONNECTION_KEEP_ALIVE     2
- 
-@@ -410,6 +414,15 @@ struct ngx_http_request_s {
+@@ -414,6 +414,15 @@ struct ngx_http_request_s {
      ngx_str_t                         exten;
      ngx_str_t                         unparsed_uri;
  

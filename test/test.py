@@ -76,8 +76,8 @@ def is_online():
 
 
 time.sleep(3)  # wait for nginx to start
-print "Running in context: %s" % RUN_CONTEXT
-print "Can disable network: %s" % can_disable_network()
+print("Running in context: %s" % RUN_CONTEXT)
+print("Can disable network: %s" % can_disable_network())
 
 
 class CacheTests(unittest.TestCase):
