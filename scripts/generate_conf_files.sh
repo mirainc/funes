@@ -85,6 +85,26 @@ if [ -z "$PROXY_BUSY_BUFFERS_SIZE" ]
 then
 	export PROXY_BUSY_BUFFERS_SIZE="4k"
 fi
+if [ -z "$PROXY_CONNECT_DATA_TIMEOUT" ]
+then
+	export PROXY_CONNECT_DATA_TIMEOUT="60s"
+fi
+if [ -z "$PROXY_READ_DATA_TIMEOUT" ]
+then
+	export PROXY_READ_DATA_TIMEOUT="60s"
+fi
+
+printf 'LOG_DIR=%s\n' "$LOG_DIR"
+printf 'CONTENT_CACHE_DIR=%s\n' "$CONTENT_CACHE_DIR"
+printf 'CONTENT_CACHE_KEYS_ZONE=%s\n' "$CONTENT_CACHE_KEYS_ZONE"
+printf 'CONTENT_CACHE_SIZE=%s\n' "$CONTENT_CACHE_SIZE"
+printf 'CERT_MEM_CACHE_TTL_SEC=%s\n' "$CERT_MEM_CACHE_TTL_SEC"
+printf 'SSL_VERIFY_DEPTH=%s\n' "$SSL_VERIFY_DEPTH"
+printf 'PROXY_BUFFER_SIZE=%s\n' "$PROXY_BUFFER_SIZE"
+printf 'PROXY_BUFFERS=%s\n' "$PROXY_BUFFERS"
+printf 'PROXY_BUSY_BUFFERS_SIZE=%s\n' "$PROXY_BUSY_BUFFERS_SIZE"
+printf 'PROXY_CONNECT_DATA_TIMEOUT=%s\n' "$PROXY_CONNECT_DATA_TIMEOUT"
+printf 'PROXY_READ_DATA_TIMEOUT=%s\n' "$PROXY_READ_DATA_TIMEOUT"
 
 # Uncomment for testing
 # export NAMESERVER="127.0.0.11"
@@ -98,5 +118,5 @@ echo "Nameserver is: $NAMESERVER"
 
 echo "Copying nginx config"
 envsubst '${ROOT_CA_CERT} ${ROOT_CA_KEY} ${LOG_DIR} ${PROXY_BUFFER_SIZE} ${PROXY_BUFFERS} ${PROXY_BUSY_BUFFERS_SIZE}' < ./conf/nginx.conf.template > ./conf/nginx.conf
-envsubst '${NAMESERVER} ${LOG_DIR} ${CONTENT_CACHE_DIR} ${CONTENT_CACHE_KEYS_ZONE} ${CONTENT_CACHE_SIZE} ${SSL_VERIFY_DEPTH}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server
+envsubst '${PROXY_CONNECT_DATA_TIMEOUT} ${PROXY_READ_DATA_TIMEOUT} ${NAMESERVER} ${LOG_DIR} ${CONTENT_CACHE_DIR} ${CONTENT_CACHE_KEYS_ZONE} ${CONTENT_CACHE_SIZE} ${SSL_VERIFY_DEPTH}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server
 envsubst '${ROOT_CA_CERT} ${ROOT_CA_KEY} ${CERT_MEM_CACHE_TTL_SEC}' < ./conf/generate_ssl_certs.template.lua > ./conf/generate_ssl_certs.lua
