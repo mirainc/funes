@@ -8,7 +8,7 @@ proxy_cache_methods GET HEAD OPTIONS;
 proxy_cache_lock on;
 
 ## Ignore headers that make requests uncacheable
-proxy_ignore_headers Set-Cookie Vary X-Accel-Buffering;
+proxy_ignore_headers Set-Cookie Vary;
 proxy_buffering on;
 
 ## Allow underscores in headers. Without this directive, nginx will strip headers with underscores.
