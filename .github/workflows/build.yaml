@@ -12,7 +12,6 @@ jobs:
         env:
           DISABLE_TRANSPARENT_PROXY: "1"
           DISABLE_DYNAMIC_CERTS: "1"
-          DISABLE_FORWARD_CACHE_EXPIRY_OVERRIDE: "1"
       - name: Create Release
         if: github.ref_type == 'tag'
         id: create_release
