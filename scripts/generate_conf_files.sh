@@ -63,7 +63,17 @@ then
 fi
 if [ -z "$CONTENT_CACHE_SIZE" ]
 then
-	export CONTENT_CACHE_SIZE="10g"
+	# Check available disk space in Gigabytes. Using -l to only check local filesystems.
+	DISK_SPACE_GB=$(df -l --block-size=1G / | awk 'NR==2 {print $2}')
+
+	if [ "$DISK_SPACE_GB" -gt 32 ]; then
+		# If disk space is > 32GB, use half of it for cache
+		CACHE_SIZE_GB=$((DISK_SPACE_GB / 2))
+		export CONTENT_CACHE_SIZE="${CACHE_SIZE_GB}g"
+	else
+		# Otherwise, use the default 10g
+		export CONTENT_CACHE_SIZE="10g"
+	fi
 fi
 if [ -z "$CERT_MEM_CACHE_TTL_SEC" ]
 then
