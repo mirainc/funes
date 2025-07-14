@@ -63,7 +63,7 @@ then
 fi
 
 # Get available disk space in Gigabytes. Using -l to only check local filesystems.
-DISK_SPACE_GB=$(df -l --block-size=1G / | awk 'NR==2 {print $2}')
+DISK_SPACE_GB=$(($(lsblk -d -b -o SIZE /dev/sda | tail -n 1) / 1073741824))
 
 # Define cache size bounds in GB
 LOWER_BOUND_GB=10
@@ -74,17 +74,18 @@ if [ "$UPPER_BOUND_GB" -lt "$LOWER_BOUND_GB" ]; then
     UPPER_BOUND_GB=$LOWER_BOUND_GB
 fi
 
-# If CONTENT_CACHE_SIZE is set, parse the numeric value.
-CACHE_SIZE_GB=$(echo "$CONTENT_CACHE_SIZE" | sed 's/[gG]$//')
-
-
-# If CONTENT_CACHE_SIZE is not set, calculate a default.
-if [ "$DISK_SPACE_GB" -gt 32 ]; then
-	# If disk space is > 32GB, use half of it for cache
-	CACHE_SIZE_GB=$((DISK_SPACE_GB / 2))
+if [ -z "$CONTENT_CACHE_SIZE" ]; then
+    # If CONTENT_CACHE_SIZE is not set, calculate a default.
+    if [ "$DISK_SPACE_GB" -gt 32 ]; then
+        # If disk space is > 32GB, use half of it for cache
+        CACHE_SIZE_GB=$((DISK_SPACE_GB / 2))
+    else
+        # Otherwise, use the default 10g
+        CACHE_SIZE_GB=10
+    fi
 else
-	# Otherwise, use the default 10g
-	CACHE_SIZE_GB=10
+    # If CONTENT_CACHE_SIZE is set, parse the numeric value.
+    CACHE_SIZE_GB=$(echo "$CONTENT_CACHE_SIZE" | sed 's/[gG]$//')
 fi
 
 # Clamp the cache size to the defined bounds
