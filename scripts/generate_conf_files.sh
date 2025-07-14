@@ -61,20 +61,43 @@ if [ -z "$CONTENT_CACHE_KEYS_ZONE" ]
 then
 	export CONTENT_CACHE_KEYS_ZONE="10m"
 fi
-if [ -z "$CONTENT_CACHE_SIZE" ]
-then
-	# Check available disk space in Gigabytes. Using -l to only check local filesystems.
-	DISK_SPACE_GB=$(df -l --block-size=1G / | awk 'NR==2 {print $2}')
 
-	if [ "$DISK_SPACE_GB" -gt 32 ]; then
-		# If disk space is > 32GB, use half of it for cache
-		CACHE_SIZE_GB=$((DISK_SPACE_GB / 2))
-		export CONTENT_CACHE_SIZE="${CACHE_SIZE_GB}g"
-	else
-		# Otherwise, use the default 10g
-		export CONTENT_CACHE_SIZE="10g"
-	fi
+# Get available disk space in Gigabytes. Using -l to only check local filesystems.
+DISK_SPACE_GB=$(df -l --block-size=1G / | awk 'NR==2 {print $2}')
+
+# Define cache size bounds in GB
+LOWER_BOUND_GB=10
+UPPER_BOUND_GB=$((DISK_SPACE_GB - 24))
+
+# Ensure the upper bound is at least the lower bound
+if [ "$UPPER_BOUND_GB" -lt "$LOWER_BOUND_GB" ]; then
+    UPPER_BOUND_GB=$LOWER_BOUND_GB
 fi
+
+# If CONTENT_CACHE_SIZE is set, parse the numeric value.
+CACHE_SIZE_GB=$(echo "$CONTENT_CACHE_SIZE" | sed 's/[gG]$//')
+
+
+# If CONTENT_CACHE_SIZE is not set, calculate a default.
+if [ "$DISK_SPACE_GB" -gt 32 ]; then
+	# If disk space is > 32GB, use half of it for cache
+	CACHE_SIZE_GB=$((DISK_SPACE_GB / 2))
+else
+	# Otherwise, use the default 10g
+	CACHE_SIZE_GB=10
+fi
+
+# Clamp the cache size to the defined bounds
+if [ "$CACHE_SIZE_GB" -lt "$LOWER_BOUND_GB" ]; then
+    echo "Cache size is below the ${LOWER_BOUND_GB}g minimum. Adjusting to ${LOWER_BOUND_GB}g."
+    CACHE_SIZE_GB=$LOWER_BOUND_GB
+elif [ "$CACHE_SIZE_GB" -gt "$UPPER_BOUND_GB" ]; then
+    echo "Cache size exceeds the upper bound of ${UPPER_BOUND_GB}g. Adjusting to ${UPPER_BOUND_GB}g."
+    CACHE_SIZE_GB=$UPPER_BOUND_GB
+fi
+
+export CONTENT_CACHE_SIZE="${CACHE_SIZE_GB}g"
+
 if [ -z "$CERT_MEM_CACHE_TTL_SEC" ]
 then
 	export CERT_MEM_CACHE_TTL_SEC="3600"
