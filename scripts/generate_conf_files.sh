@@ -69,6 +69,8 @@ DISK_SPACE_GB=$(($(lsblk -d -b -o SIZE /dev/sda | tail -n 1) / 1073741824))
 LOWER_BOUND_GB=10
 UPPER_BOUND_GB=$((DISK_SPACE_GB - 24))
 
+echo "LOWER_BOUND_GB: ${LOWER_BOUND_GB}g. UPPER_BOUND_GB: ${UPPER_BOUND_GB}g."
+
 # Ensure the upper bound is at least the lower bound
 if [ "$UPPER_BOUND_GB" -lt "$LOWER_BOUND_GB" ]; then
     UPPER_BOUND_GB=$LOWER_BOUND_GB
@@ -82,7 +84,6 @@ if [ -z "$CONTENT_CACHE_SIZE" ]; then
     else
         # Otherwise, use the default 10g
         CACHE_SIZE_GB=10
-		echo "!!!!Using the default Cache size..."
     fi
 else
     # If CONTENT_CACHE_SIZE is set, parse the numeric value.
@@ -98,8 +99,7 @@ elif [ "$CACHE_SIZE_GB" -gt "$UPPER_BOUND_GB" ]; then
     CACHE_SIZE_GB=$UPPER_BOUND_GB
 fi
 
-#export CONTENT_CACHE_SIZE="${CACHE_SIZE_GB}g"
-export CONTENT_CACHE_SIZE="40g"
+export CONTENT_CACHE_SIZE="${CACHE_SIZE_GB}g"
 
 if [ -z "$CERT_MEM_CACHE_TTL_SEC" ]
 then
