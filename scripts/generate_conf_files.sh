@@ -67,7 +67,7 @@ DISK_SPACE_GB=$(($(lsblk -d -b -o SIZE /dev/sda | tail -n 1) / 1073741824))
 
 # Define cache size bounds in GB
 LOWER_BOUND_GB=10
-UPPER_BOUND_GB=$((DISK_SPACE_GB - 24))
+UPPER_BOUND_GB=100
 
 echo "LOWER_BOUND_GB: ${LOWER_BOUND_GB}g. UPPER_BOUND_GB: ${UPPER_BOUND_GB}g."
 
