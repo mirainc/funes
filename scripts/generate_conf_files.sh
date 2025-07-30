@@ -69,7 +69,7 @@ DISK_SPACE_GB=$(($(lsblk -d -b -o SIZE /dev/sda | tail -n 1) / 1073741824))
 LOWER_BOUND_GB=10
 UPPER_BOUND_GB=100
 
-echo "LOWER_BOUND_GB: ${LOWER_BOUND_GB}g. UPPER_BOUND_GB: ${UPPER_BOUND_GB}g."
+echo "LOWER_BOUND_GB: ${LOWER_BOUND_GB}g. UPPER_BOUND_GB: ${UPPER_BOUND_GB}g. Disk Size ${DISK_SPACE_GB}."
 
 # Ensure the upper bound is at least the lower bound
 if [ "$UPPER_BOUND_GB" -lt "$LOWER_BOUND_GB" ]; then
