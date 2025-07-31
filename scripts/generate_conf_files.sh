@@ -62,32 +62,32 @@ then
 	export CONTENT_CACHE_KEYS_ZONE="10m"
 fi
 
-# Get available disk space in Gigabytes. Using -l to only check local filesystems.
-DISK_SPACE_GB=$(($(lsblk -d -b -o SIZE /dev/sda | tail -n 1) / 1073741824))
+# Get the first real disk (excluding loop, ram, sr)
+read DEVICE DISK_SIZE_BYTES < <(
+    lsblk -d -b -n -o NAME,SIZE | grep -Ev 'loop|ram|sr' | head -n 1
+)
+
+if [[ -z "$DEVICE" || -z "$DISK_SIZE_BYTES" ]]; then
+    echo "Failed to detect disk device or size."
+fi
+
+# Convert bytes to GB
+DISK_SPACE_GB=$((DISK_SIZE_BYTES / 1073741824))
+
+echo "Disk size of /dev/$DEVICE: $DISK_SPACE_GB GB"
 
 # Define cache size bounds in GB
 LOWER_BOUND_GB=10
 UPPER_BOUND_GB=100
 
-echo "LOWER_BOUND_GB: ${LOWER_BOUND_GB}g. UPPER_BOUND_GB: ${UPPER_BOUND_GB}g. Disk Size ${DISK_SPACE_GB}."
+echo "LOWER_BOUND_GB: ${LOWER_BOUND_GB}g. UPPER_BOUND_GB: ${UPPER_BOUND_GB}g."
 
-# Ensure the upper bound is at least the lower bound
-if [ "$UPPER_BOUND_GB" -lt "$LOWER_BOUND_GB" ]; then
-    UPPER_BOUND_GB=$LOWER_BOUND_GB
-fi
-
-if [ -z "$CONTENT_CACHE_SIZE" ]; then
-    # If CONTENT_CACHE_SIZE is not set, calculate a default.
-    if [ "$DISK_SPACE_GB" -gt 32 ]; then
-        # If disk space is > 32GB, use half of it for cache
-        CACHE_SIZE_GB=$((DISK_SPACE_GB / 2))
-    else
-        # Otherwise, use the default 10g
-        CACHE_SIZE_GB=10
-    fi
+if [ "$DISK_SPACE_GB" -gt 32 ]; then
+	# If disk space is > 32GB, use half of it for cache
+	CACHE_SIZE_GB=$((DISK_SPACE_GB / 2))
 else
-    # If CONTENT_CACHE_SIZE is set, parse the numeric value.
-    CACHE_SIZE_GB=$(echo "$CONTENT_CACHE_SIZE" | sed 's/[gG]$//')
+	# Otherwise, use the default 10g
+	CACHE_SIZE_GB=10
 fi
 
 # Clamp the cache size to the defined bounds
@@ -98,6 +98,8 @@ elif [ "$CACHE_SIZE_GB" -gt "$UPPER_BOUND_GB" ]; then
     echo "Cache size exceeds the upper bound of ${UPPER_BOUND_GB}g. Adjusting to ${UPPER_BOUND_GB}g."
     CACHE_SIZE_GB=$UPPER_BOUND_GB
 fi
+
+echo "Using content cache size: $CONTENT_CACHE_SIZE"
 
 export CONTENT_CACHE_SIZE="${CACHE_SIZE_GB}g"
 
