@@ -53,21 +53,20 @@ then
     export LOG_DIR="./logs"
 fi
 
-if [ -z "$ENABLE_LOGGING" ]
-then
-	export ENABLE_LOGGING="false"
-fi
-
-if [ "$ENABLE_LOGGING" = "true" ]; then
+if [ "$ENABLE_ACCESS_LOGS" = "true" ]; then
 	export ACCESS_LOG_DIRECTIVE="access_log ${LOG_DIR}/access.log;"
-	export ERROR_LOG_DIRECTIVE="error_log ${LOG_DIR}/error.log;"
 	export CACHE_ACCESS_LOG_DIRECTIVE="access_log ${LOG_DIR}/cache.log proxy_cache;"
 	export RANGE_ACCESS_LOG_DIRECTIVE="access_log ${LOG_DIR}/range_cache.log range_cache;"
 else
 	export ACCESS_LOG_DIRECTIVE="access_log off;"
-	export ERROR_LOG_DIRECTIVE="error_log off;"
 	export CACHE_ACCESS_LOG_DIRECTIVE="access_log off;"
 	export RANGE_ACCESS_LOG_DIRECTIVE="access_log off;"
+fi
+
+# Levels can be warn, error crit, alert, and emerg.
+if [ -z "$ERROR_LOG_LEVEL" ]
+then
+	export ERROR_LOG_LEVEL="crit"
 fi
 
 if [ -z "$CONTENT_CACHE_DIR" ]
@@ -148,9 +147,11 @@ if [ -z "$PROXY_READ_DATA_TIMEOUT" ]
 then
 	export PROXY_READ_DATA_TIMEOUT="60s"
 fi
-
+printf 'ERROR_LOG_LEVEL=%s\n' "$ERROR_LOG_LEVEL"
+printf 'ACCESS_LOG_DIRECTIVE=%s\n' "$ACCESS_LOG_DIRECTIVE"
+printf 'CACHE_ACCESS_LOG_DIRECTIVE=%s\n' "$CACHE_ACCESS_LOG_DIRECTIVE"
+printf 'RANGE_ACCESS_LOG_DIRECTIVE=%s\n' "$RANGE_ACCESS_LOG_DIRECTIVE"
 printf 'LOG_DIR=%s\n' "$LOG_DIR"
-printf 'ENABLE_LOGGING=%s\n' "$ENABLE_LOGGING"
 printf 'CONTENT_CACHE_DIR=%s\n' "$CONTENT_CACHE_DIR"
 printf 'CONTENT_CACHE_KEYS_ZONE=%s\n' "$CONTENT_CACHE_KEYS_ZONE"
 printf 'CONTENT_CACHE_SIZE=%s\n' "$CONTENT_CACHE_SIZE"
@@ -173,6 +174,6 @@ fi
 echo "Nameserver is: $NAMESERVER"
 
 echo "Copying nginx config"
-envsubst '${ROOT_CA_CERT} ${ROOT_CA_KEY} ${LOG_DIR} ${PROXY_BUFFER_SIZE} ${PROXY_BUFFERS} ${PROXY_BUSY_BUFFERS_SIZE} ${ACCESS_LOG_DIRECTIVE} ${ERROR_LOG_DIRECTIVE}' < ./conf/nginx.conf.template > ./conf/nginx.conf
-envsubst '${PROXY_CONNECT_DATA_TIMEOUT} ${PROXY_READ_DATA_TIMEOUT} ${NAMESERVER} ${LOG_DIR} ${CONTENT_CACHE_DIR} ${CONTENT_CACHE_KEYS_ZONE} ${CONTENT_CACHE_SIZE} ${SSL_VERIFY_DEPTH} ${CACHE_ACCESS_LOG_DIRECTIVE} ${RANGE_ACCESS_LOG_DIRECTIVE}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server
+envsubst '${ROOT_CA_CERT} ${ROOT_CA_KEY} ${ERROR_LOG_LEVEL} ${ACCESS_LOG_DIRECTIVE} ${PROXY_BUFFER_SIZE} ${PROXY_BUFFERS} ${PROXY_BUSY_BUFFERS_SIZE}' < ./conf/nginx.conf.template > ./conf/nginx.conf
+envsubst '${PROXY_CONNECT_DATA_TIMEOUT} ${PROXY_READ_DATA_TIMEOUT} ${NAMESERVER} ${CACHE_ACCESS_LOG_DIRECTIVE} ${RANGE_ACCESS_LOG_DIRECTIVE} ${CONTENT_CACHE_DIR} ${CONTENT_CACHE_KEYS_ZONE} ${CONTENT_CACHE_SIZE} ${SSL_VERIFY_DEPTH}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server
 envsubst '${ROOT_CA_CERT} ${ROOT_CA_KEY} ${CERT_MEM_CACHE_TTL_SEC}' < ./conf/generate_ssl_certs.template.lua > ./conf/generate_ssl_certs.lua

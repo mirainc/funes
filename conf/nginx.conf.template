@@ -42,7 +42,7 @@ http {
     ##
 
     ${ACCESS_LOG_DIRECTIVE}
-    ${ERROR_LOG_DIRECTIVE}
+    error_log stderr ${ERROR_LOG_LEVEL};
 
     log_format proxy_cache '$remote_addr – $upstream_cache_status $status [$time_local] $request_method $proxy_method://$host$uri $body_bytes_sent "$http_referer" "$http_user_agent" ';
 
