@@ -29,7 +29,7 @@ Inside the `build` directory, `bash run.sh` to start the application.
 There are several helper scripts that are placed in in the `build` directory. These can be run manually or added to crontabs.
 
 - `logtruncate.sh`
-  - Truncates all logs from the Funes log directory.
+  - Truncates all logs from the Funes log directory when logging is enabled (`ENABLE_LOGGING=true`).
 - `clear_cert_disk_cache.sh <AGE_MIN, default 1440> <CACHE_DIR, default /data/funes/cert_cache>`
   - Clears any generated SSL cert files older than `AGE_MIN` from `CACHE_DIR`.
 
@@ -52,6 +52,9 @@ RESTRICT_LOCAL_DOCKER
 
 # Disable dynamic SSL cert generation, instead passing the root cert on each response
 DISABLE_DYNAMIC_CERTS
+
+# Enable Nginx access/error logs (otherwise `access_log`/`error_log` directives are set to `off`)
+ENABLE_LOGGING
 ```
 
 Usage example:

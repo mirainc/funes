@@ -153,7 +153,7 @@ server {
         ## The time here is overridden by our injected `expires $cache_expiry` header.
         proxy_cache_valid 200 206 1s;
 
-        access_log ${LOG_DIR}/cache.log proxy_cache;
+        ${CACHE_ACCESS_LOG_DIRECTIVE}
     }
 }
 
@@ -241,7 +241,7 @@ server {
         proxy_ssl_trusted_certificate ./cacert.pem;
         proxy_ssl_server_name on;
 
-        access_log ${LOG_DIR}/range_cache.log range_cache;
+        ${RANGE_ACCESS_LOG_DIRECTIVE}
     }
 }
 
