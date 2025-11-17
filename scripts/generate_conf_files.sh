@@ -46,6 +46,8 @@ chown www-data $ROOT_CA_KEY
 
 ## Run this if you want to add the root CA cert to local certificate store.
 # cp $ROOT_CA_CERT /usr/local/share/ca-certificates/
+
+
 # update-ca-certificates
 
 if [ -z "$LOG_DIR" ]
@@ -147,12 +149,17 @@ if [ -z "$PROXY_READ_DATA_TIMEOUT" ]
 then
 	export PROXY_READ_DATA_TIMEOUT="60s"
 fi
+if [ -z "$HOST" ]
+then
+	export HOST="127.0.0.1"
+fi
+
+printf 'HOST=%s\n' "$HOST"
 printf 'ERROR_LOG_LEVEL=%s\n' "$ERROR_LOG_LEVEL"
 printf 'ACCESS_LOG_DIRECTIVE=%s\n' "$ACCESS_LOG_DIRECTIVE"
 printf 'CACHE_ACCESS_LOG_DIRECTIVE=%s\n' "$CACHE_ACCESS_LOG_DIRECTIVE"
 printf 'RANGE_ACCESS_LOG_DIRECTIVE=%s\n' "$RANGE_ACCESS_LOG_DIRECTIVE"
 printf 'LOG_DIR=%s\n' "$LOG_DIR"
-printf 'ENABLE_LOGGING=%s\n' "$ENABLE_LOGGING"
 printf 'CONTENT_CACHE_DIR=%s\n' "$CONTENT_CACHE_DIR"
 printf 'CONTENT_CACHE_KEYS_ZONE=%s\n' "$CONTENT_CACHE_KEYS_ZONE"
 printf 'CONTENT_CACHE_SIZE=%s\n' "$CONTENT_CACHE_SIZE"

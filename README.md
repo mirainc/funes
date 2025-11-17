@@ -132,7 +132,7 @@ In `conf/nginx.conf.server`, expiration rules can be set for URI (`$uri_expiry`)
 Start chrome with the following flag:
 
 ```
---proxy-server="https=127.0.0.1:3128;http=127.0.0.1:3128"
+--proxy-server="https=127.0.0.1:3128;http=127.0.0.1:3128 --ignore-certificate-errors"
 ```
 
 ### Electron
