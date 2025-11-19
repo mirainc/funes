@@ -8,15 +8,16 @@ services:
       - "80:80"
       - "443:443"
       - "3128:3128"
-    # volumes:
-    # - ./:/usr/src/app/:rw
+    volumes:
+      - ./data/logs:/usr/src/app/build/logs
+      - ./data/content_cache:/data/funes/content_cache
     # command: ["bash", "-c", "sleep infinity"]
     environment:
-      - HELLO=WORLD
       - VERBOSE=true
-      # - RESTRICT_LOCAL=1
       - DISABLE_TRANSPARENT_PROXY=1
       - DISABLE_DYNAMIC_CERTS=1
+      - ENABLE_ACCESS_LOGS=true
+      - HOST=0.0.0.0
     # - PROXY_BUFFER_SIZE=128k
     # - PROXY_BUFFERS=4 128k
     # - PROXY_BUSY_BUFFERS_SIZE=128k

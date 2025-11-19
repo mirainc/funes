@@ -46,6 +46,8 @@ chown www-data $ROOT_CA_KEY
 
 ## Run this if you want to add the root CA cert to local certificate store.
 # cp $ROOT_CA_CERT /usr/local/share/ca-certificates/
+
+
 # update-ca-certificates
 
 if [ -z "$LOG_DIR" ]
@@ -147,6 +149,12 @@ if [ -z "$PROXY_READ_DATA_TIMEOUT" ]
 then
 	export PROXY_READ_DATA_TIMEOUT="60s"
 fi
+if [ -z "$HOST" ]
+then
+	export HOST="127.0.0.1"
+fi
+
+printf 'HOST=%s\n' "$HOST"
 printf 'ERROR_LOG_LEVEL=%s\n' "$ERROR_LOG_LEVEL"
 printf 'ACCESS_LOG_DIRECTIVE=%s\n' "$ACCESS_LOG_DIRECTIVE"
 printf 'CACHE_ACCESS_LOG_DIRECTIVE=%s\n' "$CACHE_ACCESS_LOG_DIRECTIVE"
@@ -175,5 +183,5 @@ echo "Nameserver is: $NAMESERVER"
 
 echo "Copying nginx config"
 envsubst '${ROOT_CA_CERT} ${ROOT_CA_KEY} ${ERROR_LOG_LEVEL} ${ACCESS_LOG_DIRECTIVE} ${PROXY_BUFFER_SIZE} ${PROXY_BUFFERS} ${PROXY_BUSY_BUFFERS_SIZE}' < ./conf/nginx.conf.template > ./conf/nginx.conf
-envsubst '${PROXY_CONNECT_DATA_TIMEOUT} ${PROXY_READ_DATA_TIMEOUT} ${NAMESERVER} ${CACHE_ACCESS_LOG_DIRECTIVE} ${RANGE_ACCESS_LOG_DIRECTIVE} ${CONTENT_CACHE_DIR} ${CONTENT_CACHE_KEYS_ZONE} ${CONTENT_CACHE_SIZE} ${SSL_VERIFY_DEPTH}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server
+envsubst '${HOST} ${PROXY_CONNECT_DATA_TIMEOUT} ${PROXY_READ_DATA_TIMEOUT} ${NAMESERVER} ${CACHE_ACCESS_LOG_DIRECTIVE} ${RANGE_ACCESS_LOG_DIRECTIVE} ${CONTENT_CACHE_DIR} ${CONTENT_CACHE_KEYS_ZONE} ${CONTENT_CACHE_SIZE} ${SSL_VERIFY_DEPTH}' < ./conf/nginx.conf.server.template > ./conf/nginx.conf.server
 envsubst '${ROOT_CA_CERT} ${ROOT_CA_KEY} ${CERT_MEM_CACHE_TTL_SEC}' < ./conf/generate_ssl_certs.template.lua > ./conf/generate_ssl_certs.lua
