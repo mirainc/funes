@@ -125,11 +125,11 @@ then
 fi
 if [ -z "$PROXY_CONNECT_DATA_TIMEOUT" ]
 then
-	export PROXY_CONNECT_DATA_TIMEOUT="60s"
+	export PROXY_CONNECT_DATA_TIMEOUT="600s"
 fi
 if [ -z "$PROXY_READ_DATA_TIMEOUT" ]
 then
-	export PROXY_READ_DATA_TIMEOUT="60s"
+	export PROXY_READ_DATA_TIMEOUT="600s"
 fi
 
 printf 'LOG_DIR=%s\n' "$LOG_DIR"
