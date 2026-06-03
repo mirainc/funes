@@ -51,13 +51,13 @@ eval "require LWP::UserAgent";
 
 my %urls = (
   'nss' =>
-    'https://hg.mozilla.org/projects/nss/raw-file/default/lib/ckfw/builtins/certdata.txt',
+    'https://hg-edge.mozilla.org/projects/nss/raw-file/default/lib/ckfw/builtins/certdata.txt',
   'central' =>
-    'https://hg.mozilla.org/mozilla-central/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
+    'https://hg-edge.mozilla.org/mozilla-central/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'beta' =>
-    'https://hg.mozilla.org/releases/mozilla-beta/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
+    'https://hg-edge.mozilla.org/releases/mozilla-beta/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
   'release' =>
-    'https://hg.mozilla.org/releases/mozilla-release/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
+    'https://hg-edge.mozilla.org/releases/mozilla-release/raw-file/default/security/nss/lib/ckfw/builtins/certdata.txt',
 );
 
 $opt_d = 'release';
