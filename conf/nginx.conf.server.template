@@ -146,8 +146,13 @@ server {
 
         # These timeouts can be tuned (read nginx documentation for more info)
         # proxy_connect_timeout 1s;
-        # proxy_read_timeout 60s;
         # proxy_send_timeout 60s;
+
+        # Without this, the nginx default of 60s applies on this hop and kills
+        # long-poll connections (e.g. PubNub subscribe, which holds ~280s),
+        # returning "504 Gateway Time-out" even though the client proxy hop
+        # already allows ${PROXY_READ_DATA_TIMEOUT}.
+        proxy_read_timeout ${PROXY_READ_DATA_TIMEOUT};
 
         ## Set valid cached response types.
         ## The time here is overridden by our injected `expires $cache_expiry` header.
@@ -188,6 +193,10 @@ server {
 
     location / {
         proxy_pass $forward_proxy_scheme://$http_host$request_uri;
+
+        # Match the client proxy hop; the nginx default of 60s otherwise
+        # times out long-poll upstreams (e.g. PubNub subscribe) on this hop.
+        proxy_read_timeout ${PROXY_READ_DATA_TIMEOUT};
 
         proxy_ssl_verify on;
         proxy_ssl_verify_depth ${SSL_VERIFY_DEPTH};
