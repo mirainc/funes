@@ -141,13 +141,16 @@ if [ -z "$PROXY_BUSY_BUFFERS_SIZE" ]
 then
 	export PROXY_BUSY_BUFFERS_SIZE="4k"
 fi
-if [ -z "$PROXY_CONNECT_DATA_TIMEOUT" ]
-then
-	export PROXY_CONNECT_DATA_TIMEOUT="60s"
-fi
 if [ -z "$PROXY_READ_DATA_TIMEOUT" ]
 then
 	export PROXY_READ_DATA_TIMEOUT="60s"
+fi
+if [ -z "$PROXY_CONNECT_DATA_TIMEOUT" ]
+then
+	# Follow PROXY_READ_DATA_TIMEOUT so raising only the read timeout also
+	# covers the CONNECT tunnel, which HTTPS long-polls (e.g. PubNub
+	# subscribe) traverse and which would otherwise idle out at 60s.
+	export PROXY_CONNECT_DATA_TIMEOUT="$PROXY_READ_DATA_TIMEOUT"
 fi
 if [ -z "$HOST" ]
 then
